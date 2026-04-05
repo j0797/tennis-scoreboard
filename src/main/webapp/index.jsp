@@ -1,13 +1,9 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<!DOCTYPE html>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
-<head>
-    <title>JSP - Hello World</title>
-</head>
+<head><title>Tennis Scoreboard</title></head>
 <body>
-<h1><%= "Hello World!" %>
-</h1>
-<br/>
-<a href="hello-servlet">Hello Servlet</a>
+<h1>Welcome!</h1>
+<a href="new-match">Start new match</a><br/>
+<a href="matches">View finished matches</a>
 </body>
 </html>
