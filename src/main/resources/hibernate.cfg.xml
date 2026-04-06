@@ -16,6 +16,8 @@
         <property name="hibernate.format_sql">true</property>
         <property name="hibernate.hbm2ddl.auto">update</property>
 
+        <property name="hibernate.current_session_context_class">thread</property>
+
         <property name="hibernate.hikari.maximumPoolSize">10</property>
         <property name="hibernate.hikari.minimumIdle">2</property>
         <property name="hibernate.hikari.idleTimeout">30000</property>
