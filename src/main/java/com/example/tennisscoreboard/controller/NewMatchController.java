@@ -6,7 +6,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @WebServlet("/new-match")
 public class NewMatchController extends HttpServlet {
@@ -30,7 +29,7 @@ public class NewMatchController extends HttpServlet {
             return;
         }
 
-        UUID matchId = matchService.createMatch(playerOneName, playerTwoName);
-        response.sendRedirect(request.getContextPath() + "/match-score?uuid=" + matchId);
+        Long matchId = matchService.createMatch(playerOneName, playerTwoName);
+        response.sendRedirect(request.getContextPath() + "/match-score?id=" + matchId);
     }
 }
