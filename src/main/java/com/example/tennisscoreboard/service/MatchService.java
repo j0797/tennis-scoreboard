@@ -5,8 +5,11 @@ import com.example.tennisscoreboard.dao.PlayerDao;
 import com.example.tennisscoreboard.entity.Match;
 import com.example.tennisscoreboard.entity.Player;
 import com.example.tennisscoreboard.util.HibernateUtil;
+import jakarta.persistence.PersistenceException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+
+import java.util.Optional;
 
 public class MatchService {
 
@@ -16,39 +19,39 @@ public class MatchService {
 
     public Long createMatch(String playerOneName, String playerTwoName) {
         Session session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
+
+        Player p1 = findOrCreatePlayer(playerOneName);
+        Player p2 = findOrCreatePlayer(playerTwoName);
+
+        Match match = Match.builder()
+                .player1(p1)
+                .player2(p2)
+                .winner(null)
+                .build();
+
+        matchDao.save(match);
+        return match.getId();
+    }
+
+    private Player findOrCreatePlayer(String name) {
+        Optional<Player> existing = playerDao.findByName(name);
+        if (existing.isPresent()) {
+            return existing.get();
+        }
         try {
-            Player p1 = playerDao.findByName(playerOneName)
-                    .orElseGet(() -> playerDao.save(new Player(playerOneName)));
-            Player p2 = playerDao.findByName(playerTwoName)
-                    .orElseGet(() -> playerDao.save(new Player(playerTwoName)));
-
-            Match match = Match.builder()
-                    .player1(p1)
-                    .player2(p2)
-                    .winner(null)
-                    .build();
-
-            matchDao.save(match);
-            session.getTransaction().commit();
-            return match.getId();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw new RuntimeException("Failed to create match", e);
+            Player newPlayer = new Player(name);
+            playerDao.save(newPlayer);
+            sessionFactory.getCurrentSession().flush();
+            return newPlayer;
+        } catch (PersistenceException e) {
+            sessionFactory.getCurrentSession().clear();
+            return playerDao.findByName(name).orElseThrow();
         }
     }
 
     public Match getMatch(Long id) {
         Session session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
-        try {
-            Match match = matchDao.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Match not found"));
-            session.getTransaction().commit();
-            return match;
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw e;
-        }
+        return matchDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("Match not found"));
     }
 }
