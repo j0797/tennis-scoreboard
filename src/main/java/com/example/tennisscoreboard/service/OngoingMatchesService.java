@@ -23,9 +23,9 @@ public class OngoingMatchesService {
     public static void addPoint(UUID matchId, int playerNumber) {
         OngoingMatch match = ongoingMatches.get(matchId);
         if (match == null) return;
-        match.getScore().addPointToPlayer(playerNumber);
-        if (match.getScore().isMatchOver()) {
-            match.setMatchOver(true);
+
+        MatchScoreCalculationService.addPoint(match, playerNumber);
+        if (match.isMatchOver()) {
             match.setWinner(playerNumber == 1 ? match.getPlayerOne() : match.getPlayerTwo());
         }
     }
