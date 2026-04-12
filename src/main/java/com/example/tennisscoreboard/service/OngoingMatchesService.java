@@ -1,18 +1,36 @@
 package com.example.tennisscoreboard.service;
 
-import com.example.tennisscoreboard.model.MatchScore;
+import com.example.tennisscoreboard.entity.Player;
+import com.example.tennisscoreboard.model.OngoingMatch;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class OngoingMatchesService {
-    private final Map<Long, MatchScore> scores = new ConcurrentHashMap<>();
+    private static final Map<UUID, OngoingMatch> ongoingMatches = new ConcurrentHashMap<>();
 
-    public MatchScore getScore(Long matchId) {
-        return scores.computeIfAbsent(matchId, id -> new MatchScore());
+    public static UUID createMatch(Player playerOne, Player playerTwo) {
+        UUID matchId = UUID.randomUUID();
+        ongoingMatches.put(matchId, new OngoingMatch(playerOne, playerTwo));
+        return matchId;
     }
 
-    public void addPoint(Long matchId, int playerNumber) {
-        getScore(matchId).addPointToPlayer(playerNumber);
+    public static OngoingMatch getMatch(UUID matchId) {
+        return ongoingMatches.get(matchId);
+    }
+
+    public static void addPoint(UUID matchId, int playerNumber) {
+        OngoingMatch match = ongoingMatches.get(matchId);
+        if (match == null) return;
+        match.getScore().addPointToPlayer(playerNumber);
+        if (match.getScore().isMatchOver()) {
+            match.setMatchOver(true);
+            match.setWinner(playerNumber == 1 ? match.getPlayerOne() : match.getPlayerTwo());
+        }
+    }
+
+    public static void deleteMatch(UUID matchId) {
+        ongoingMatches.remove(matchId);
     }
 }

@@ -1,7 +1,6 @@
 package com.example.tennisscoreboard.controller;
 
-import com.example.tennisscoreboard.entity.Match;
-import com.example.tennisscoreboard.model.MatchScore;
+import com.example.tennisscoreboard.model.OngoingMatch;
 import com.example.tennisscoreboard.service.MatchService;
 import com.example.tennisscoreboard.service.OngoingMatchesService;
 import jakarta.servlet.ServletException;
@@ -11,12 +10,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @WebServlet("/match-score")
 public class MatchScoreController extends HttpServlet {
 
     private final MatchService matchService = new MatchService();
-    private final OngoingMatchesService ongoingMatches = new OngoingMatchesService();
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -26,14 +25,17 @@ public class MatchScoreController extends HttpServlet {
             return;
         }
         try {
-            Long matchId = Long.parseLong(idParam);
-            Match match = matchService.getMatch(matchId);
-            MatchScore score = ongoingMatches.getScore(matchId);
-            request.setAttribute("match", match);
-            request.setAttribute("score", score);
+            UUID matchId = UUID.fromString(idParam);
+            OngoingMatch ongoingMatch = OngoingMatchesService.getMatch(matchId);
+            if (ongoingMatch == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+            request.setAttribute("match", ongoingMatch);
+            request.setAttribute("score", ongoingMatch.getScore());
             request.getRequestDispatcher("/WEB-INF/jsp/match-score.jsp").forward(request, response);
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid match id");
+        } catch (IllegalArgumentException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid UUID");
         }
     }
 
@@ -48,12 +50,12 @@ public class MatchScoreController extends HttpServlet {
         }
 
         try {
-            long matchId = Long.parseLong(idParam);
+            UUID matchId = UUID.fromString(idParam);
             int playerNumber = Integer.parseInt(playerParam);
-            ongoingMatches.addPoint(matchId, playerNumber);
+            OngoingMatchesService.addPoint(matchId, playerNumber);
             response.sendRedirect(request.getContextPath() + "/match-score?id=" + matchId);
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameters");
+        } catch (IllegalArgumentException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid UUID");
         }
     }
 }

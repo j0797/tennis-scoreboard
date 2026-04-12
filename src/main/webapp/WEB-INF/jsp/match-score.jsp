@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <body>
-<h2>${match.player1.name} vs ${match.player2.name}</h2>
+<h2>${match.playerOne.name} vs ${match.playerTwo.name}</h2>
 <p>Points: ${score.playerOnePoints} : ${score.playerTwoPoints}</p>
 <form method="post">
   <input type="hidden" name="id" value="${param.id}">

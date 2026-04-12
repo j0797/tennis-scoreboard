@@ -10,6 +10,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class MatchService {
 
@@ -17,20 +18,10 @@ public class MatchService {
     private final PlayerDao playerDao = new PlayerDao(sessionFactory);
     private final MatchDao matchDao = new MatchDao(sessionFactory);
 
-    public Long createMatch(String playerOneName, String playerTwoName) {
-        Session session = sessionFactory.getCurrentSession();
-
+    public UUID createOngoingMatch(String playerOneName, String playerTwoName) {
         Player p1 = findOrCreatePlayer(playerOneName);
         Player p2 = findOrCreatePlayer(playerTwoName);
-
-        Match match = Match.builder()
-                .player1(p1)
-                .player2(p2)
-                .winner(null)
-                .build();
-
-        matchDao.save(match);
-        return match.getId();
+        return OngoingMatchesService.createMatch(p1, p2);
     }
 
     private Player findOrCreatePlayer(String name) {
