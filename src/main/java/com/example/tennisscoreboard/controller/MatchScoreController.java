@@ -52,8 +52,14 @@ public class MatchScoreController extends HttpServlet {
         try {
             UUID matchId = UUID.fromString(idParam);
             int playerNumber = Integer.parseInt(playerParam);
+            OngoingMatch match = OngoingMatchesService.getMatch(matchId);
+            boolean wasMatchOver = match != null && match.isMatchOver();
             OngoingMatchesService.addPoint(matchId, playerNumber);
-            response.sendRedirect(request.getContextPath() + "/match-score?id=" + matchId);
+            if (match != null && match.isMatchOver()) {
+                response.sendRedirect(request.getContextPath() + "/matches");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/match-score?id=" + matchId);
+            }
         } catch (IllegalArgumentException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid UUID");
         }

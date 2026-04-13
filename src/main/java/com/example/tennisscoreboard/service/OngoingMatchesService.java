@@ -27,6 +27,9 @@ public class OngoingMatchesService {
         MatchScoreCalculationService.addPoint(match, playerNumber);
         if (match.isMatchOver()) {
             match.setWinner(playerNumber == 1 ? match.getPlayerOne() : match.getPlayerTwo());
+            FinishedMatchesPersistenceService persistence = new FinishedMatchesPersistenceService();
+            persistence.save(match);
+            ongoingMatches.remove(matchId);
         }
     }
 
