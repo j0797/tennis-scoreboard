@@ -1,7 +1,6 @@
 package com.example.tennisscoreboard.controller;
 
 import com.example.tennisscoreboard.model.OngoingMatch;
-import com.example.tennisscoreboard.service.MatchService;
 import com.example.tennisscoreboard.service.OngoingMatchesService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,8 +13,6 @@ import java.util.UUID;
 
 @WebServlet("/match-score")
 public class MatchScoreController extends HttpServlet {
-
-    private final MatchService matchService = new MatchService();
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -53,7 +50,6 @@ public class MatchScoreController extends HttpServlet {
             UUID matchId = UUID.fromString(idParam);
             int playerNumber = Integer.parseInt(playerParam);
             OngoingMatch match = OngoingMatchesService.getMatch(matchId);
-            boolean wasMatchOver = match != null && match.isMatchOver();
             OngoingMatchesService.addPoint(matchId, playerNumber);
             if (match != null && match.isMatchOver()) {
                 response.sendRedirect(request.getContextPath() + "/matches");

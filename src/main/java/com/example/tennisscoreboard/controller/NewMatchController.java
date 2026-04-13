@@ -1,6 +1,8 @@
 package com.example.tennisscoreboard.controller;
 
-import com.example.tennisscoreboard.service.MatchService;
+import com.example.tennisscoreboard.entity.Player;
+import com.example.tennisscoreboard.service.OngoingMatchesService;
+import com.example.tennisscoreboard.service.PlayerService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -11,7 +13,7 @@ import java.util.UUID;
 @WebServlet("/new-match")
 public class NewMatchController extends HttpServlet {
 
-    private final MatchService matchService = new MatchService();
+    private final PlayerService playerService = new PlayerService();
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -30,7 +32,9 @@ public class NewMatchController extends HttpServlet {
             return;
         }
 
-        UUID matchId = matchService.createOngoingMatch(playerOneName, playerTwoName);
+        Player p1 = playerService.findOrCreatePlayer(playerOneName);
+        Player p2 = playerService.findOrCreatePlayer(playerTwoName);
+        UUID matchId = OngoingMatchesService.createMatch(p1, p2);
         response.sendRedirect(request.getContextPath() + "/match-score?id=" + matchId);
     }
 }
