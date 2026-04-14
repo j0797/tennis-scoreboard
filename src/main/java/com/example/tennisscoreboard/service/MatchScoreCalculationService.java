@@ -5,13 +5,21 @@ import com.example.tennisscoreboard.model.OngoingMatch;
 
 public class MatchScoreCalculationService {
 
+    private static final int POINTS_DEUCE_THRESHOLD = 3;
+    private static final int GAMES_TO_WIN_SET = 6;
+    private static final int MIN_GAMES_DIFFERENCE_FOR_SET = 2;
+    private static final int TIEBREAK_TRIGGER_GAMES = 6;
+    private static final int TIEBREAK_POINTS_TO_WIN = 7;
+    private static final int TIEBREAK_MIN_DIFFERENCE = 2;
+    private static final int SETS_TO_WIN_MATCH = 2;
+
     public static void addPoint(OngoingMatch match, int playerNumber) {
         if (match.isMatchOver()) return;
 
         MatchScore score = match.getScore();
         boolean isPlayerOne = (playerNumber == 1);
 
-        if (match.isOpenTieBreak()) {
+        if (match.isTieBreak()) {
             handleTieBreakPoint(match, isPlayerOne);
         } else {
             handleRegularPoint(match, isPlayerOne);
@@ -24,9 +32,9 @@ public class MatchScoreCalculationService {
         int scoringPoints = isPlayerOne ? score.getPlayerOnePoints() : score.getPlayerTwoPoints();
         int opponentPoints = isPlayerOne ? score.getPlayerTwoPoints() : score.getPlayerOnePoints();
 
-        if (scoringPoints == 3) {
-            if (opponentPoints == 3) {
-                match.setDeuceSituation(true);
+        if (scoringPoints == POINTS_DEUCE_THRESHOLD) {
+            if (opponentPoints == POINTS_DEUCE_THRESHOLD) {
+                match.setDeuce(true);
                 handleDeuce(match, isPlayerOne);
             } else {
                 winGame(match, isPlayerOne);
@@ -43,7 +51,7 @@ public class MatchScoreCalculationService {
             if (score.isPlayerOneAdvantage()) {
                 resetAdvantage(score);
                 winGame(match, true);
-                match.setDeuceSituation(false);
+                match.setDeuce(false);
             } else if (score.isPlayerTwoAdvantage()) {
                 resetAdvantage(score);
             } else {
@@ -53,7 +61,7 @@ public class MatchScoreCalculationService {
             if (score.isPlayerTwoAdvantage()) {
                 resetAdvantage(score);
                 winGame(match, false);
-                match.setDeuceSituation(false);
+                match.setDeuce(false);
             } else if (score.isPlayerOneAdvantage()) {
                 resetAdvantage(score);
             } else {
@@ -67,7 +75,7 @@ public class MatchScoreCalculationService {
         score.setPlayerOnePoints(0);
         score.setPlayerTwoPoints(0);
         resetAdvantage(score);
-        match.setDeuceSituation(false);
+        match.setDeuce(false);
 
         if (isPlayerOne) score.setPlayerOneGames(score.getPlayerOneGames() + 1);
         else score.setPlayerTwoGames(score.getPlayerTwoGames() + 1);
@@ -80,12 +88,12 @@ public class MatchScoreCalculationService {
         int p1Games = score.getPlayerOneGames();
         int p2Games = score.getPlayerTwoGames();
 
-        if (p1Games >= 6 && (p1Games - p2Games) >= 2) {
+        if (p1Games >= GAMES_TO_WIN_SET && (p1Games - p2Games) >= MIN_GAMES_DIFFERENCE_FOR_SET) {
             winSet(match, true);
-        } else if (p2Games >= 6 && (p2Games - p1Games) >= 2) {
+        } else if (p2Games >= GAMES_TO_WIN_SET && (p2Games - p1Games) >= MIN_GAMES_DIFFERENCE_FOR_SET) {
             winSet(match, false);
-        } else if (p1Games == 6 && p2Games == 6) {
-            match.setOpenTieBreak(true);
+        } else if (p1Games == TIEBREAK_TRIGGER_GAMES && p2Games == TIEBREAK_TRIGGER_GAMES) {
+            match.setTieBreak(true);
         }
     }
 
@@ -98,9 +106,9 @@ public class MatchScoreCalculationService {
         score.setPlayerTwoGames(0);
         score.setPlayerOneTieBreakPoints(0);
         score.setPlayerTwoTieBreakPoints(0);
-        match.setOpenTieBreak(false);
+        match.setTieBreak(false);
 
-        if (score.getPlayerOneSets() == 2 || score.getPlayerTwoSets() == 2) {
+        if (score.getPlayerOneSets() == SETS_TO_WIN_MATCH || score.getPlayerTwoSets() == SETS_TO_WIN_MATCH) {
             match.setMatchOver(true);
         }
     }
@@ -113,7 +121,7 @@ public class MatchScoreCalculationService {
         int scoringTB = isPlayerOne ? score.getPlayerOneTieBreakPoints() : score.getPlayerTwoTieBreakPoints();
         int opponentTB = isPlayerOne ? score.getPlayerTwoTieBreakPoints() : score.getPlayerOneTieBreakPoints();
 
-        if (scoringTB >= 7 && (scoringTB - opponentTB) >= 2) {
+        if (scoringTB >= TIEBREAK_POINTS_TO_WIN && (scoringTB - opponentTB) >= TIEBREAK_MIN_DIFFERENCE) {
             winSet(match, isPlayerOne);
         }
     }

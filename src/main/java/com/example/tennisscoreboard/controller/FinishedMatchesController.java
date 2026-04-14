@@ -13,17 +13,18 @@ import java.io.IOException;
 @WebServlet("/matches")
 public class FinishedMatchesController extends HttpServlet {
     private final FinishedMatchesPersistenceService service = new FinishedMatchesPersistenceService();
+    private static final long DEFAULT_PAGE_NUMBER = 1L;
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String playerName = req.getParameter("playerName");
-        String pageParam = req.getParameter("page");
-        long page = pageParam != null ? Long.parseLong(pageParam) : 1L;
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String playerName = request.getParameter("playerName");
+        String pageNumber = request.getParameter("page");
+        long page = pageNumber != null ? Long.parseLong(pageNumber) : DEFAULT_PAGE_NUMBER;
 
         PaginationResponseDTO result = service.getFinishedMatches(playerName, page);
-        req.setAttribute("matches", result.getMatches());
-        req.setAttribute("totalPages", result.getTotalPages());
-        req.setAttribute("currentPage", page);
-        req.getRequestDispatcher("/WEB-INF/jsp/matches.jsp").forward(req, resp);
+        request.setAttribute("matches", result.getMatches());
+        request.setAttribute("totalPages", result.getTotalPages());
+        request.setAttribute("currentPage", page);
+        request.getRequestDispatcher("/WEB-INF/jsp/matches.jsp").forward(request, response);
     }
 }

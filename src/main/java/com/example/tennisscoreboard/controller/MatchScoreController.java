@@ -16,14 +16,14 @@ public class MatchScoreController extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String idParam = request.getParameter("id");
-        if (idParam == null) {
+        String matchId = request.getParameter("id");
+        if (matchId == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
         try {
-            UUID matchId = UUID.fromString(idParam);
-            OngoingMatch ongoingMatch = OngoingMatchesService.getMatch(matchId);
+            UUID id = UUID.fromString(matchId);
+            OngoingMatch ongoingMatch = OngoingMatchesService.getOngoingMatch(id);
             if (ongoingMatch == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
@@ -38,19 +38,19 @@ public class MatchScoreController extends HttpServlet {
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String idParam = request.getParameter("id");
-        String playerParam = request.getParameter("player");
+        String matchId = request.getParameter("id");
+        String playerNumber = request.getParameter("player");
 
-        if (idParam == null || playerParam == null) {
+        if (matchId == null || playerNumber == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         try {
-            UUID matchId = UUID.fromString(idParam);
-            int playerNumber = Integer.parseInt(playerParam);
-            OngoingMatch match = OngoingMatchesService.getMatch(matchId);
-            OngoingMatchesService.addPoint(matchId, playerNumber);
+            UUID id = UUID.fromString(matchId);
+            int player = Integer.parseInt(playerNumber);
+            OngoingMatch match = OngoingMatchesService.getOngoingMatch(id);
+            OngoingMatchesService.addPoint(id, player);
             if (match != null && match.isMatchOver()) {
                 response.sendRedirect(request.getContextPath() + "/matches");
             } else {

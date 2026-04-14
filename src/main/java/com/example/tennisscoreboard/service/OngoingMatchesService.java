@@ -16,7 +16,7 @@ public class OngoingMatchesService {
         return matchId;
     }
 
-    public static OngoingMatch getMatch(UUID matchId) {
+    public static OngoingMatch getOngoingMatch(UUID matchId) {
         return ongoingMatches.get(matchId);
     }
 

@@ -12,15 +12,15 @@ public class OngoingMatch {
     private Player winner;
     private MatchScore score;
     private boolean matchOver;
-    private boolean openTieBreak = false;
-    private boolean deuceSituation = false;
+    private boolean isTieBreak = false;
+    private boolean isDeuce = false;
 
     public OngoingMatch(Player playerOne, Player playerTwo) {
         this.playerOne = playerOne;
         this.playerTwo = playerTwo;
         this.score = new MatchScore();
         this.matchOver = false;
-        this.openTieBreak = false;
-        this.deuceSituation = false;
+        this.isTieBreak = false;
+        this.isDeuce = false;
     }
 }
