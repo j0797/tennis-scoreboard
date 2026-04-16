@@ -1,8 +1,10 @@
 package com.example.tennisscoreboard.service;
 
 import com.example.tennisscoreboard.dao.MatchDao;
-import com.example.tennisscoreboard.dto.PaginationResponseDTO;
+import com.example.tennisscoreboard.dto.MatchDto;
+import com.example.tennisscoreboard.dto.PaginationResponseDto;
 import com.example.tennisscoreboard.entity.Match;
+import com.example.tennisscoreboard.mapper.MatchMapper;
 import com.example.tennisscoreboard.mapper.OngoingMatchMapper;
 import com.example.tennisscoreboard.model.OngoingMatch;
 import com.example.tennisscoreboard.util.HibernateUtil;
@@ -21,7 +23,7 @@ public class FinishedMatchesPersistenceService {
         matchDao.save(finishedMatch);
     }
 
-    public PaginationResponseDTO getFinishedMatches(String playerName, Long currentPage) {
+    public PaginationResponseDto<MatchDto> getFinishedMatches(String playerName, Long currentPage) {
         String formattedName = (playerName == null || playerName.isBlank()) ? null : playerName.trim();
         int pageSize = DEFAULT_PAGE_SIZE;
         int offset = (int) ((currentPage - 1) * pageSize);
@@ -30,7 +32,9 @@ public class FinishedMatchesPersistenceService {
         Long totalPages = (long) Math.ceil((double) totalMatches / pageSize);
 
         List<Match> matches = matchDao.findAll(formattedName, offset, pageSize);
-
-        return new PaginationResponseDTO(matches, totalPages);
+        List<MatchDto> matchDtos = matches.stream()
+                .map(MatchMapper.INSTANCE::toDto)
+                .toList();
+        return new PaginationResponseDto<>(matchDtos, totalPages);
     }
 }

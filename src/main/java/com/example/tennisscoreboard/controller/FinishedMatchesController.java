@@ -1,6 +1,7 @@
 package com.example.tennisscoreboard.controller;
 
-import com.example.tennisscoreboard.dto.PaginationResponseDTO;
+import com.example.tennisscoreboard.dto.MatchDto;
+import com.example.tennisscoreboard.dto.PaginationResponseDto;
 import com.example.tennisscoreboard.service.FinishedMatchesPersistenceService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,8 +22,8 @@ public class FinishedMatchesController extends HttpServlet {
         String pageNumber = request.getParameter("page");
         long page = pageNumber != null ? Long.parseLong(pageNumber) : DEFAULT_PAGE_NUMBER;
 
-        PaginationResponseDTO result = service.getFinishedMatches(playerName, page);
-        request.setAttribute("matches", result.getMatches());
+        PaginationResponseDto<MatchDto> result = service.getFinishedMatches(playerName, page);
+        request.setAttribute("matches", result.getItems());
         request.setAttribute("totalPages", result.getTotalPages());
         request.setAttribute("currentPage", page);
         request.getRequestDispatcher("/WEB-INF/jsp/matches.jsp").forward(request, response);
