@@ -26,6 +26,9 @@ public class FinishedMatchesPersistenceService {
     public PaginationResponseDto<MatchDto> getFinishedMatches(String playerName, Long currentPage) {
         String formattedName = (playerName == null || playerName.isBlank()) ? null : playerName.trim();
         int pageSize = DEFAULT_PAGE_SIZE;
+        if (currentPage == null || currentPage < 1) {
+            currentPage = 1L;
+        }
         int offset = (int) ((currentPage - 1) * pageSize);
 
         Long totalMatches = matchDao.countAll(formattedName);

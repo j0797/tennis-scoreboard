@@ -41,7 +41,7 @@ public class MatchScoreController extends HttpServlet {
     }
 
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String matchId = request.getParameter("id");
         String playerNumber = request.getParameter("player");
 
@@ -63,7 +63,11 @@ public class MatchScoreController extends HttpServlet {
             OngoingMatchesService.addPoint(id, player);
 
             if (match.isMatchOver()) {
-                response.sendRedirect(request.getContextPath() + "/matches");
+                MatchScoreDisplayDto displayDto = MatchScoreDisplayMapper.toDisplayDto(match);
+                request.setAttribute("displayDto", displayDto);
+                request.setAttribute("match", match);
+                request.setAttribute("matchOver", true);
+                request.getRequestDispatcher("/WEB-INF/jsp/match-score.jsp").forward(request, response);
             } else {
                 response.sendRedirect(request.getContextPath() + "/match-score?id=" + matchId);
             }

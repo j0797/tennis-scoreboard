@@ -20,8 +20,18 @@ public class FinishedMatchesController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String playerName = request.getParameter("playerName");
         String pageNumber = request.getParameter("page");
-        long page = pageNumber != null ? Long.parseLong(pageNumber) : DEFAULT_PAGE_NUMBER;
+        long page = DEFAULT_PAGE_NUMBER;
 
+        if (pageNumber != null) {
+            try {
+                page = Long.parseLong(pageNumber);
+                if (page < 1) {
+                    page = DEFAULT_PAGE_NUMBER;
+                }
+            } catch (NumberFormatException e) {
+                page = DEFAULT_PAGE_NUMBER;
+            }
+        }
         PaginationResponseDto<MatchDto> result = service.getFinishedMatches(playerName, page);
         request.setAttribute("matches", result.getItems());
         request.setAttribute("totalPages", result.getTotalPages());

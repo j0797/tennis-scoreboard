@@ -15,11 +15,18 @@
     <p>Tie-break: ${displayDto.tieBreakPoints}</p>
 </c:if>
 
-<form method="post">
-    <input type="hidden" name="id" value="${param.id}">
-    <button name="player" value="1">+1 Player 1</button>
-    <button name="player" value="2">+1 Player 2</button>
-</form>
+<c:if test="${matchOver}">
+    <p><strong>Match over! Winner: ${match.winner.name}</strong></p>
+</c:if>
+
+
+<c:if test="${not matchOver}">
+    <form method="post">
+        <input type="hidden" name="id" value="${param.id}">
+        <button name="player" value="1">+1 Player 1</button>
+        <button name="player" value="2">+1 Player 2</button>
+    </form>
+</c:if>
 
 <a href="${pageContext.request.contextPath}/">Home</a>
 </body>
