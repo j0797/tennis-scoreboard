@@ -16,7 +16,6 @@ public class MatchScoreCalculationService {
     public static void addPoint(OngoingMatch match, int playerNumber) {
         if (match.isMatchOver()) return;
 
-        MatchScore score = match.getScore();
         boolean isPlayerOne = (playerNumber == 1);
 
         if (match.isTieBreak()) {

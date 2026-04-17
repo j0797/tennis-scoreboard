@@ -5,9 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
-import java.io.Serializable;
-
-public abstract class BaseDao<ID extends Serializable, E> {
+public abstract class BaseDao<E> {
     protected final SessionFactory sessionFactory;
     private static final Logger log = LoggerFactory.getLogger(BaseDao.class);
 
@@ -15,10 +13,9 @@ public abstract class BaseDao<ID extends Serializable, E> {
         this.sessionFactory = sessionFactory;
     }
 
-    public E save(E model) {
+    public void save(E model) {
         Session session = sessionFactory.getCurrentSession();
         session.persist(model);
         log.info("{} has been saved", model.getClass().getSimpleName());
-        return model;
     }
 }

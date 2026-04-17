@@ -12,8 +12,8 @@ public class OngoingMatch {
     private Player winner;
     private MatchScore score;
     private boolean matchOver;
-    private boolean isTieBreak = false;
-    private boolean isDeuce = false;
+    private boolean isTieBreak;
+    private boolean isDeuce;
 
     public OngoingMatch(Player playerOne, Player playerTwo) {
         this.playerOne = playerOne;

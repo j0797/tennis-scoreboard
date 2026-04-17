@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(componentModel = "default")
+@Mapper
 public interface OngoingMatchMapper {
     OngoingMatchMapper INSTANCE = Mappers.getMapper(OngoingMatchMapper.class);
 

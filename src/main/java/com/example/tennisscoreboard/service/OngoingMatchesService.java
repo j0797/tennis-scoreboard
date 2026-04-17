@@ -32,8 +32,4 @@ public class OngoingMatchesService {
             ongoingMatches.remove(matchId);
         }
     }
-
-    public static void deleteMatch(UUID matchId) {
-        ongoingMatches.remove(matchId);
-    }
 }
