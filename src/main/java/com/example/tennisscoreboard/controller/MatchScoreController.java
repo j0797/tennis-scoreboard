@@ -1,5 +1,7 @@
 package com.example.tennisscoreboard.controller;
 
+import com.example.tennisscoreboard.dto.MatchScoreDisplayDto;
+import com.example.tennisscoreboard.mapper.MatchScoreDisplayMapper;
 import com.example.tennisscoreboard.model.OngoingMatch;
 import com.example.tennisscoreboard.service.OngoingMatchesService;
 import jakarta.servlet.ServletException;
@@ -28,8 +30,10 @@ public class MatchScoreController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
+            MatchScoreDisplayDto displayDto = MatchScoreDisplayMapper.toDisplayDto(ongoingMatch);
+            request.setAttribute("displayDto", displayDto);
             request.setAttribute("match", ongoingMatch);
-            request.setAttribute("score", ongoingMatch.getScore());
+
             request.getRequestDispatcher("/WEB-INF/jsp/match-score.jsp").forward(request, response);
         } catch (IllegalArgumentException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid UUID");
@@ -50,14 +54,21 @@ public class MatchScoreController extends HttpServlet {
             UUID id = UUID.fromString(matchId);
             int player = Integer.parseInt(playerNumber);
             OngoingMatch match = OngoingMatchesService.getOngoingMatch(id);
+
+            if (match == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+
             OngoingMatchesService.addPoint(id, player);
-            if (match != null && match.isMatchOver()) {
+
+            if (match.isMatchOver()) {
                 response.sendRedirect(request.getContextPath() + "/matches");
             } else {
                 response.sendRedirect(request.getContextPath() + "/match-score?id=" + matchId);
             }
         } catch (IllegalArgumentException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid UUID");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid UUID or player number");
         }
     }
 }
