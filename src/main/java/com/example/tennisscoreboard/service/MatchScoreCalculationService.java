@@ -71,14 +71,19 @@ public class MatchScoreCalculationService {
 
     private static void winGame(OngoingMatch match, boolean isPlayerOne) {
         MatchScore score = match.getScore();
+        int oldPlayerOneGames = score.getPlayerOneGames();
+        int oldPlayerTwoGames = score.getPlayerTwoGames();
+        if (oldPlayerOneGames == TIEBREAK_TRIGGER_GAMES && oldPlayerTwoGames == TIEBREAK_TRIGGER_GAMES) {
+            match.setTieBreak(true);
+            return;
+        }
+
         score.setPlayerOnePoints(0);
         score.setPlayerTwoPoints(0);
         resetAdvantage(score);
         match.setDeuce(false);
-
-        if (isPlayerOne) score.setPlayerOneGames(score.getPlayerOneGames() + 1);
-        else score.setPlayerTwoGames(score.getPlayerTwoGames() + 1);
-
+        if (isPlayerOne) score.setPlayerOneGames(oldPlayerOneGames + 1);
+        else score.setPlayerTwoGames(oldPlayerTwoGames + 1);
         checkSetWinner(match);
     }
 
@@ -91,8 +96,6 @@ public class MatchScoreCalculationService {
             winSet(match, true);
         } else if (p2Games >= GAMES_TO_WIN_SET && (p2Games - p1Games) >= MIN_GAMES_DIFFERENCE_FOR_SET) {
             winSet(match, false);
-        } else if (p1Games == TIEBREAK_TRIGGER_GAMES && p2Games == TIEBREAK_TRIGGER_GAMES) {
-            match.setTieBreak(true);
         }
     }
 
