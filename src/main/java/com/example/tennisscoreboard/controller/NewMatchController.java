@@ -35,6 +35,6 @@ public class NewMatchController extends HttpServlet {
         Player p1 = playerService.findOrCreatePlayer(playerOneName);
         Player p2 = playerService.findOrCreatePlayer(playerTwoName);
         UUID matchId = OngoingMatchesService.createMatch(p1, p2);
-        response.sendRedirect(request.getContextPath() + "/match-score?id=" + matchId);
+        response.sendRedirect(request.getContextPath() + "/match-score?uuid=" + matchId);
     }
 }

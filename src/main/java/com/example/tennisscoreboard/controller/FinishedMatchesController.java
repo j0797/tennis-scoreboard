@@ -18,7 +18,7 @@ public class FinishedMatchesController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String playerName = request.getParameter("playerName");
+        String playerName = request.getParameter("filter_by_player_name");
         String pageNumber = request.getParameter("page");
         long page = DEFAULT_PAGE_NUMBER;
 

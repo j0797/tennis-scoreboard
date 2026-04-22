@@ -73,7 +73,7 @@
                     <c:if test="${not matchOver}">
                         <td class="table-text">
                             <form method="post" action="${pageContext.request.contextPath}/match-score">
-                                <input type="hidden" name="id" value="${param.id}">
+                                <input type="hidden" name="uuid" value="${param.uuid}">
                                 <button class="score-btn" name="player" value="1">Score</button>
                             </form>
                         </td>
@@ -96,7 +96,7 @@
                     <c:if test="${not matchOver}">
                         <td class="table-text">
                             <form method="post" action="${pageContext.request.contextPath}/match-score">
-                                <input type="hidden" name="id" value="${param.id}">
+                                <input type="hidden" name="uuid" value="${param.uuid}">
                                 <button class="score-btn" name="player" value="2">Score</button>
                             </form>
                         </td>

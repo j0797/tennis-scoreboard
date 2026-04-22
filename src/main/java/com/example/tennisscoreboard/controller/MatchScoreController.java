@@ -18,7 +18,7 @@ public class MatchScoreController extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String matchId = request.getParameter("id");
+        String matchId = request.getParameter("uuid");
         if (matchId == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
@@ -42,7 +42,7 @@ public class MatchScoreController extends HttpServlet {
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        String matchId = request.getParameter("id");
+        String matchId = request.getParameter("uuid");
         String playerNumber = request.getParameter("player");
 
         if (matchId == null || playerNumber == null) {
@@ -69,7 +69,7 @@ public class MatchScoreController extends HttpServlet {
                 request.setAttribute("matchOver", true);
                 request.getRequestDispatcher("/WEB-INF/jsp/match-score.jsp").forward(request, response);
             } else {
-                response.sendRedirect(request.getContextPath() + "/match-score?id=" + matchId);
+                response.sendRedirect(request.getContextPath() + "/match-score?uuid=" + matchId);
             }
         } catch (IllegalArgumentException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid UUID or player number");
