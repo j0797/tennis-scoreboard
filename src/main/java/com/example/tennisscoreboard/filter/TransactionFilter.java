@@ -1,5 +1,8 @@
 package com.example.tennisscoreboard.filter;
 
+import com.example.tennisscoreboard.exception.DatabaseException;
+import com.example.tennisscoreboard.exception.NotFoundException;
+import com.example.tennisscoreboard.exception.ValidationException;
 import com.example.tennisscoreboard.util.HibernateUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
@@ -24,13 +27,31 @@ public class TransactionFilter implements Filter {
             session.beginTransaction();
             chain.doFilter(request, response);
             session.getTransaction().commit();
+        } catch (ValidationException | NotFoundException e) {
+            if (session.getTransaction().isActive()) {
+                session.getTransaction().rollback();
+            }
+            int status = e instanceof ValidationException ? HttpServletResponse.SC_BAD_REQUEST : HttpServletResponse.SC_NOT_FOUND;
+            log.warn("Client error: {}", e.getMessage());
+            resp.setStatus(status);
+            resp.setContentType("text/plain;charset=UTF-8");
+            resp.getWriter().write(e.getMessage());
+        } catch (DatabaseException e) {
+            if (session.getTransaction().isActive()) {
+                session.getTransaction().rollback();
+            }
+            log.error("Database error", e);
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.setContentType("text/plain;charset=UTF-8");
+            resp.getWriter().write("Database error. Please try again later.");
         } catch (Exception e) {
             if (session.getTransaction().isActive()) {
                 session.getTransaction().rollback();
             }
-            log.error("Transaction rolled back due to exception", e);
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    "An internal error occurred. Please try again later.");
+            log.error("Unexpected error", e);
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.setContentType("text/plain;charset=UTF-8");
+            resp.getWriter().write("An internal error occurred. Please try again later.");
         }
     }
 }

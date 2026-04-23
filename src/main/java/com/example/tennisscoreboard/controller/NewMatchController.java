@@ -1,8 +1,10 @@
 package com.example.tennisscoreboard.controller;
 
 import com.example.tennisscoreboard.entity.Player;
+import com.example.tennisscoreboard.exception.ValidationException;
 import com.example.tennisscoreboard.service.OngoingMatchesService;
 import com.example.tennisscoreboard.service.PlayerService;
+import com.example.tennisscoreboard.util.Validator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -21,20 +23,25 @@ public class NewMatchController extends HttpServlet {
     }
 
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String playerOneName = request.getParameter("playerOneName");
-        String playerTwoName = request.getParameter("playerTwoName");
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        try {
+            String playerOneName = request.getParameter("playerOneName");
+            String playerTwoName = request.getParameter("playerTwoName");
 
-        if (playerOneName == null || playerOneName.isBlank() ||
-                playerTwoName == null || playerTwoName.isBlank() ||
-                playerOneName.equals(playerTwoName)) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid player names");
-            return;
+            Validator.validateName(playerOneName);
+            Validator.validateName(playerTwoName);
+
+            if (playerOneName.equals(playerTwoName)) {
+                throw new ValidationException("Player names must be different");
+            }
+
+            Player p1 = playerService.findOrCreatePlayer(playerOneName);
+            Player p2 = playerService.findOrCreatePlayer(playerTwoName);
+            UUID matchId = OngoingMatchesService.createMatch(p1, p2);
+            response.sendRedirect(request.getContextPath() + "/match-score?uuid=" + matchId);
+        } catch (ValidationException e) {
+            request.setAttribute("error", e.getMessage());
+            request.getRequestDispatcher("/WEB-INF/jsp/new-match.jsp").forward(request, response);
         }
-
-        Player p1 = playerService.findOrCreatePlayer(playerOneName);
-        Player p2 = playerService.findOrCreatePlayer(playerTwoName);
-        UUID matchId = OngoingMatchesService.createMatch(p1, p2);
-        response.sendRedirect(request.getContextPath() + "/match-score?uuid=" + matchId);
     }
 }

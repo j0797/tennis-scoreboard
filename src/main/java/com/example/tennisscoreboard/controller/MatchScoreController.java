@@ -1,9 +1,11 @@
 package com.example.tennisscoreboard.controller;
 
 import com.example.tennisscoreboard.dto.MatchScoreDisplayDto;
+import com.example.tennisscoreboard.exception.NotFoundException;
 import com.example.tennisscoreboard.mapper.MatchScoreDisplayMapper;
 import com.example.tennisscoreboard.model.OngoingMatch;
 import com.example.tennisscoreboard.service.OngoingMatchesService;
+import com.example.tennisscoreboard.util.Validator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -18,61 +20,41 @@ public class MatchScoreController extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String matchId = request.getParameter("uuid");
-        if (matchId == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+        String matchIdParam = request.getParameter("uuid");
+        UUID id = Validator.validateUuid(matchIdParam);
+        OngoingMatch ongoingMatch = OngoingMatchesService.getOngoingMatch(id);
+        if (ongoingMatch == null) {
+            throw new NotFoundException("Match not found");
         }
-        try {
-            UUID id = UUID.fromString(matchId);
-            OngoingMatch ongoingMatch = OngoingMatchesService.getOngoingMatch(id);
-            if (ongoingMatch == null) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-            MatchScoreDisplayDto displayDto = MatchScoreDisplayMapper.toDisplayDto(ongoingMatch);
-            request.setAttribute("displayDto", displayDto);
-            request.setAttribute("match", ongoingMatch);
-
-            request.getRequestDispatcher("/WEB-INF/jsp/match-score.jsp").forward(request, response);
-        } catch (IllegalArgumentException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid UUID");
-        }
+        MatchScoreDisplayDto displayDto = MatchScoreDisplayMapper.toDisplayDto(ongoingMatch);
+        request.setAttribute("displayDto", displayDto);
+        request.setAttribute("match", ongoingMatch);
+        request.getRequestDispatcher("/WEB-INF/jsp/match-score.jsp").forward(request, response);
     }
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        String matchId = request.getParameter("uuid");
-        String playerNumber = request.getParameter("player");
+        String matchIdParam = request.getParameter("uuid");
+        String playerNumberParam = request.getParameter("player");
 
-        if (matchId == null || playerNumber == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
+        UUID id = Validator.validateUuid(matchIdParam);
+        int player = Validator.validatePlayerNumber(playerNumberParam);
+
+        OngoingMatch match = OngoingMatchesService.getOngoingMatch(id);
+        if (match == null) {
+            throw new NotFoundException("Match not found");
         }
 
-        try {
-            UUID id = UUID.fromString(matchId);
-            int player = Integer.parseInt(playerNumber);
-            OngoingMatch match = OngoingMatchesService.getOngoingMatch(id);
+        OngoingMatchesService.addPoint(id, player);
 
-            if (match == null) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
-            OngoingMatchesService.addPoint(id, player);
-
-            if (match.isMatchOver()) {
-                MatchScoreDisplayDto displayDto = MatchScoreDisplayMapper.toDisplayDto(match);
-                request.setAttribute("displayDto", displayDto);
-                request.setAttribute("match", match);
-                request.setAttribute("matchOver", true);
-                request.getRequestDispatcher("/WEB-INF/jsp/match-score.jsp").forward(request, response);
-            } else {
-                response.sendRedirect(request.getContextPath() + "/match-score?uuid=" + matchId);
-            }
-        } catch (IllegalArgumentException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid UUID or player number");
+        if (match.isMatchOver()) {
+            MatchScoreDisplayDto displayDto = MatchScoreDisplayMapper.toDisplayDto(match);
+            request.setAttribute("displayDto", displayDto);
+            request.setAttribute("match", match);
+            request.setAttribute("matchOver", true);
+            request.getRequestDispatcher("/WEB-INF/jsp/match-score.jsp").forward(request, response);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/match-score?uuid=" + id);
         }
     }
 }
