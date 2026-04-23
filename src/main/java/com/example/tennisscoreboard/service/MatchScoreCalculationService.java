@@ -2,6 +2,8 @@ package com.example.tennisscoreboard.service;
 
 import com.example.tennisscoreboard.model.MatchScore;
 import com.example.tennisscoreboard.model.OngoingMatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MatchScoreCalculationService {
 
@@ -13,8 +15,14 @@ public class MatchScoreCalculationService {
     private static final int TIEBREAK_MIN_DIFFERENCE = 2;
     private static final int SETS_TO_WIN_MATCH = 2;
 
+    private static final Logger log = LoggerFactory.getLogger(MatchScoreCalculationService.class);
+
     public static void addPoint(OngoingMatch match, int playerNumber) {
-        if (match.isMatchOver()) return;
+        if (match.isMatchOver()) {
+            log.warn("Attempt to add point to finished match");
+            return;
+        }
+        log.debug("Adding point");
 
         boolean isPlayerOne = (playerNumber == 1);
 
@@ -59,10 +67,12 @@ public class MatchScoreCalculationService {
         } else {
             if (score.isPlayerTwoAdvantage()) {
                 resetAdvantage(score);
+                log.debug("Advantage lost, back to deuce");
                 winGame(match, false);
                 match.setDeuce(false);
             } else if (score.isPlayerOneAdvantage()) {
                 resetAdvantage(score);
+                log.debug("Advantage lost, back to deuce");
             } else {
                 score.setPlayerTwoAdvantage(true);
             }
@@ -73,17 +83,24 @@ public class MatchScoreCalculationService {
         MatchScore score = match.getScore();
         int oldPlayerOneGames = score.getPlayerOneGames();
         int oldPlayerTwoGames = score.getPlayerTwoGames();
+
         if (oldPlayerOneGames == TIEBREAK_TRIGGER_GAMES && oldPlayerTwoGames == TIEBREAK_TRIGGER_GAMES) {
             match.setTieBreak(true);
+            score.setPlayerOnePoints(0);
+            score.setPlayerTwoPoints(0);
+            resetAdvantage(score);
+            match.setDeuce(false);
+            log.debug("Tiebreak started");
             return;
         }
-
         score.setPlayerOnePoints(0);
         score.setPlayerTwoPoints(0);
         resetAdvantage(score);
         match.setDeuce(false);
         if (isPlayerOne) score.setPlayerOneGames(oldPlayerOneGames + 1);
         else score.setPlayerTwoGames(oldPlayerTwoGames + 1);
+        log.debug("Player {} wins game. Games: {}-{}", isPlayerOne ? "1" : "2",
+                score.getPlayerOneGames(), score.getPlayerTwoGames());
         checkSetWinner(match);
     }
 
@@ -104,6 +121,9 @@ public class MatchScoreCalculationService {
         if (isPlayerOne) score.setPlayerOneSets(score.getPlayerOneSets() + 1);
         else score.setPlayerTwoSets(score.getPlayerTwoSets() + 1);
 
+        log.debug("Player {} wins set. Sets: {}-{}", isPlayerOne ? "1" : "2",
+                score.getPlayerOneSets(), score.getPlayerTwoSets());
+
         score.setPlayerOneGames(0);
         score.setPlayerTwoGames(0);
         score.setPlayerOneTieBreakPoints(0);
@@ -112,6 +132,7 @@ public class MatchScoreCalculationService {
 
         if (score.getPlayerOneSets() == SETS_TO_WIN_MATCH || score.getPlayerTwoSets() == SETS_TO_WIN_MATCH) {
             match.setMatchOver(true);
+            log.debug("Match over after set win");
         }
     }
 
@@ -122,7 +143,9 @@ public class MatchScoreCalculationService {
 
         int scoringTB = isPlayerOne ? score.getPlayerOneTieBreakPoints() : score.getPlayerTwoTieBreakPoints();
         int opponentTB = isPlayerOne ? score.getPlayerTwoTieBreakPoints() : score.getPlayerOneTieBreakPoints();
-
+        log.debug("After tiebreak point: P1 TB={}, P2 TB={}",
+                match.getScore().getPlayerOneTieBreakPoints(),
+                match.getScore().getPlayerTwoTieBreakPoints());
         if (scoringTB >= TIEBREAK_POINTS_TO_WIN && (scoringTB - opponentTB) >= TIEBREAK_MIN_DIFFERENCE) {
             winSet(match, isPlayerOne);
         }
