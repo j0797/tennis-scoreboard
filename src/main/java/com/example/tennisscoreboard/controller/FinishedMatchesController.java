@@ -16,7 +16,15 @@ import java.io.IOException;
 
 @WebServlet("/matches")
 public class FinishedMatchesController extends HttpServlet {
+
+    // TODO: Зависимость `FinishedMatchesPersistenceService` создаётся напрямую в месте объявления. Вместо этого стоит внедрять зависимости через `init()` метод сервлета.
+
+    // Все повторяющиеся или важные строковые литералы лучше вынести в `private static final` константы с понятными именами.
+        // Именованная константа делает код более семантически понятным.
+
     private final FinishedMatchesPersistenceService service = new FinishedMatchesPersistenceService();
+
+    // Константы объявляются первыми (пишутся в самом верху) в классе. long DEFAULT_PAGE_NUMBER, а также Logger log должны быть выше FinishedMatchesPersistenceService service
     private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final Logger log = LoggerFactory.getLogger(FinishedMatchesController.class);
 
@@ -27,9 +35,13 @@ public class FinishedMatchesController extends HttpServlet {
         log.info("GET /matches with filter='{}', page='{}'", playerName, pageNumberParam);
         long page = DEFAULT_PAGE_NUMBER;
         if (pageNumberParam != null) {
+
+            // Validator лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
             page = Validator.validatePage(pageNumberParam);
         }
         PaginationResponseDto<MatchDto> result = service.getFinishedMatches(playerName, page);
+
+        // Данные о странице передаются по частям (хотя для этого есть специальный PaginationResponseDto). Лучше передавать сам DTO (и добавить в него currentPage)
         request.setAttribute("matches", result.getItems());
         request.setAttribute("totalPages", result.getTotalPages());
         request.setAttribute("currentPage", page);

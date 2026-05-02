@@ -9,10 +9,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MatchScoreCalculationServiceTest {
 
+    // После проведение декомпозиции и рефакторинга доменных моделей, также следует изменить тесты для этой части логики.
+
     private OngoingMatch match;
 
     @BeforeEach
     void setUp() {
+
+        // В тестах доменных моделей (как и в самих моделях) не должны использоваться JPA Entity
         Player p1 = new Player("PlayerOne");
         Player p2 = new Player("PlayerTwo");
         match = new OngoingMatch(p1, p2);

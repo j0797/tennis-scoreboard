@@ -6,6 +6,13 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class Validator {
+
+    // Все магические числа и строки лучше вынести в `private static final` константы с понятными именами.
+        // Именованная константа делает код более семантически понятным.
+
+    // Многие методы и валидируют и парсят значение — это нарушает Принцип единой ответственности (SRP) на уровне метода.
+        // Валидатор должен заниматься только валидацией.
+
     private static final Pattern ALLOWED_CHARS_PATTERN = Pattern.compile("^[a-zA-Zа-яА-ЯЁё\\s\\-']+$");
 
     public static void validateName(String name) {
