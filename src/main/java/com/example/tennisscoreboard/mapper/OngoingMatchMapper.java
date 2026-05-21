@@ -11,8 +11,8 @@ import org.mapstruct.factory.Mappers;
 public interface OngoingMatchMapper {
     OngoingMatchMapper INSTANCE = Mappers.getMapper(OngoingMatchMapper.class);
 
-    @Mapping(source = "playerOne", target = "player1")
-    @Mapping(source = "playerTwo", target = "player2")
+    @Mapping(source = "playerOne", target = "firstPlayer")
+    @Mapping(source = "playerTwo", target = "secondPlayer")
     @Mapping(source = "winner", target = "winner")
     @Mapping(target = "id", ignore = true)
     Match toEntity(OngoingMatch ongoingMatch);
