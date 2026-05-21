@@ -42,10 +42,17 @@ public class FinishedMatchesPersistenceService {
         }
         int offset = (int) ((currentPage - 1) * pageSize);
 
-        Long totalMatches = matchDao.countAll(formattedName);
-        Long totalPages = (long) Math.ceil((double) totalMatches / pageSize);
+        Long totalMatches;
+        List<Match> matches;
 
-        List<Match> matches = matchDao.findAll(formattedName, offset, pageSize);
+        if (formattedName == null || formattedName.isBlank()) {
+            totalMatches = matchDao.countAll();
+            matches = matchDao.findAll(offset, pageSize);
+        } else {
+            totalMatches = matchDao.countByPlayerName(formattedName);
+            matches = matchDao.findByPlayerName(formattedName, offset, pageSize);
+        }
+        Long totalPages = (long) Math.ceil((double) totalMatches / pageSize);
 
         // Метод, принимающий List<Match> и возвращающий List<MatchDto> можно добавить в MatchMapper и перенести эту логику в него.
         List<MatchDto> matchDtos = matches.stream()
