@@ -1,4 +1,4 @@
-package com.example.tennisscoreboard.service;
+package com.example.tennisscoreboard.service.impl;
 
 import com.example.tennisscoreboard.model.MatchScore;
 import com.example.tennisscoreboard.model.OngoingMatch;

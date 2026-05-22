@@ -2,8 +2,8 @@ package com.example.tennisscoreboard.controller;
 
 import com.example.tennisscoreboard.entity.Player;
 import com.example.tennisscoreboard.exception.ValidationException;
-import com.example.tennisscoreboard.service.OngoingMatchesService;
-import com.example.tennisscoreboard.service.PlayerService;
+import com.example.tennisscoreboard.service.impl.OngoingMatchesServiceImpl;
+import com.example.tennisscoreboard.service.impl.PlayerServiceImpl;
 import com.example.tennisscoreboard.util.Validator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -48,7 +48,7 @@ public class NewMatchController extends HttpServlet {
         // Это повысит безопасность приложения и улучшит пользовательский опыт при возникновении ошибок.
 
     private static final Logger log = LoggerFactory.getLogger(NewMatchController.class);
-    private final PlayerService playerService = new PlayerService();
+    private final PlayerServiceImpl playerService = new PlayerServiceImpl();
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -76,7 +76,7 @@ public class NewMatchController extends HttpServlet {
             // Лучше давать переменным полные имена.
             Player p1 = playerService.findOrCreatePlayer(playerOneName);
             Player p2 = playerService.findOrCreatePlayer(playerTwoName);
-            UUID matchId = OngoingMatchesService.createMatch(p1, p2);
+            UUID matchId = OngoingMatchesServiceImpl.createMatch(p1, p2);
             log.info("Match created with id {}", matchId);
             response.sendRedirect(request.getContextPath() + "/match-score?uuid=" + matchId);
 

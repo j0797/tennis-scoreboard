@@ -4,7 +4,7 @@ import com.example.tennisscoreboard.dto.MatchScoreDisplayDto;
 import com.example.tennisscoreboard.exception.NotFoundException;
 import com.example.tennisscoreboard.mapper.MatchScoreDisplayMapper;
 import com.example.tennisscoreboard.model.OngoingMatch;
-import com.example.tennisscoreboard.service.OngoingMatchesService;
+import com.example.tennisscoreboard.service.impl.OngoingMatchesServiceImpl;
 import com.example.tennisscoreboard.util.Validator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -49,7 +49,7 @@ public class MatchScoreController extends HttpServlet {
 
         // OngoingMatchesService лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
         // Сервлет не должен работать с доменными моделями
-        OngoingMatch ongoingMatch = OngoingMatchesService.getOngoingMatch(id);
+        OngoingMatch ongoingMatch = OngoingMatchesServiceImpl.getOngoingMatch(id);
         if (ongoingMatch == null) {
             throw new NotFoundException("Match not found");
         }
@@ -78,7 +78,7 @@ public class MatchScoreController extends HttpServlet {
         // OngoingMatchesService лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
         // Сервлет не должен работать с доменными моделями
         // Здесь переменная OngoingMatch называется match, а в методе doGet называется ongoingMatch. Лучше придерживаться одного подхода в именовании.
-        OngoingMatch match = OngoingMatchesService.getOngoingMatch(id);
+        OngoingMatch match = OngoingMatchesServiceImpl.getOngoingMatch(id);
         if (match == null) {
             log.warn("Match not found for uuid {}", id);
 
@@ -87,7 +87,7 @@ public class MatchScoreController extends HttpServlet {
         }
 
         // OngoingMatchesService лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
-        OngoingMatchesService.addPoint(id, player);
+        OngoingMatchesServiceImpl.addPoint(id, player);
 
         if (match.isMatchOver()) {
             log.info("Match {} finished after point by player {}", id, player);
