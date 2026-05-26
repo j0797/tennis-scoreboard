@@ -1,6 +1,6 @@
 package com.example.tennisscoreboard.controller;
 
-import com.example.tennisscoreboard.dto.MatchScoreDisplayDto;
+import com.example.tennisscoreboard.dto.ScoreDto;
 import com.example.tennisscoreboard.exception.NotFoundException;
 import com.example.tennisscoreboard.mapper.MatchScoreDisplayMapper;
 import com.example.tennisscoreboard.model.OngoingMatch;
@@ -55,7 +55,7 @@ public class MatchScoreController extends HttpServlet {
         }
 
         // MatchScoreDisplayMapper лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
-        MatchScoreDisplayDto displayDto = MatchScoreDisplayMapper.toDisplayDto(ongoingMatch);
+        ScoreDto displayDto = MatchScoreDisplayMapper.toDisplayDto(ongoingMatch);
         request.setAttribute("displayDto", displayDto);
 
         // Сервлет не должен передавать доменные модели во View
@@ -93,7 +93,7 @@ public class MatchScoreController extends HttpServlet {
             log.info("Match {} finished after point by player {}", id, player);
 
             // MatchScoreDisplayMapper лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
-            MatchScoreDisplayDto displayDto = MatchScoreDisplayMapper.toDisplayDto(match);
+            ScoreDto displayDto = MatchScoreDisplayMapper.toDisplayDto(match);
             request.setAttribute("displayDto", displayDto);
 
             // Сервлет не должен передавать доменные модели во View

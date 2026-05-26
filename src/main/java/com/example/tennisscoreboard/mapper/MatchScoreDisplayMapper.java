@@ -1,13 +1,13 @@
 package com.example.tennisscoreboard.mapper;
 
-import com.example.tennisscoreboard.dto.MatchScoreDisplayDto;
+import com.example.tennisscoreboard.dto.ScoreDto;
 import com.example.tennisscoreboard.model.MatchScore;
 import com.example.tennisscoreboard.model.OngoingMatch;
 
 public class MatchScoreDisplayMapper {
 
     // После рефакторинга MatchScoreDisplayDto этот метод тоже должен будет измениться соответствующим образом.
-    public static MatchScoreDisplayDto toDisplayDto(OngoingMatch match) {
+    public static ScoreDto toDisplayDto(OngoingMatch match) {
         MatchScore score = match.getScore();
 
         String points1 = formatPoints(
@@ -28,7 +28,7 @@ public class MatchScoreDisplayMapper {
                 ? (score.getPlayerOneTieBreakPoints() + ":" + score.getPlayerTwoTieBreakPoints())
                 : null;
 
-        return new MatchScoreDisplayDto(points1, points2, games, sets, match.isTieBreak(), tieBreakPoints);
+        return new ScoreDto(points1, points2, games, sets, match.isTieBreak(), tieBreakPoints);
     }
 
     // Метод раскодирует количество очков в реальный счёт в гейме. Обязанность хранить счёт в корректных величинах лежит на доменной модели.

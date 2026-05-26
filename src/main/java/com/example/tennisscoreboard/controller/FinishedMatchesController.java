@@ -42,10 +42,10 @@ public class FinishedMatchesController extends HttpServlet {
         PaginationResponseDto<MatchDto> result = service.getFinishedMatches(playerName, page);
 
         // Данные о странице передаются по частям (хотя для этого есть специальный PaginationResponseDto). Лучше передавать сам DTO (и добавить в него currentPage)
-        request.setAttribute("matches", result.getItems());
-        request.setAttribute("totalPages", result.getTotalPages());
+        request.setAttribute("matches", result.items());
+        request.setAttribute("totalPages", result.totalPages());
         request.setAttribute("currentPage", page);
-        log.debug("Found {} matches, totalPages={}", result.getItems().size(), result.getTotalPages());
+        log.debug("Found {} matches, totalPages={}", result.items().size(), result.totalPages());
         request.getRequestDispatcher("/WEB-INF/jsp/matches.jsp").forward(request, response);
     }
 }
