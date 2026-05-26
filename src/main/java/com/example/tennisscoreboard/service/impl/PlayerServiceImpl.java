@@ -19,11 +19,10 @@ public class PlayerServiceImpl {
 
     // TODO: PlayerDao стоит внедрять через конструктор, а не создавать в этом классе.
 
+    private static final Logger log = LoggerFactory.getLogger(PlayerServiceImpl.class);
     private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
     private final PlayerDao playerDao = new PlayerDao(sessionFactory);
 
-    // статические поля (static) обычно идут перед полями экземпляра, поэтому это поле должно быть объявлено раньше (находиться выше), чем другие поля
-    private static final Logger log = LoggerFactory.getLogger(PlayerServiceImpl.class);
 
     public Player findOrCreatePlayer(String name) {
         Optional<Player> existing = playerDao.findByName(name);

@@ -10,35 +10,37 @@ public class MatchScoreCalculationService {
     // TODO: Нет интерфейса для этого класса. (см. файл "service.md" в этом же пакете)
 
     // TODO: Класс содержит в себе всю бизнес-логику по подсчёту очков, геймов и сетов.
-        // Объекты, которыми он оперирует (`MatchScore`, `OngoingMatch`), являются "анемичными" моделями —
-        // простыми контейнерами данных практически без собственного поведения. Сервис напрямую читает и записывает их поля.
-        // Это главная архитектурная проблема этой части логики. По этим причинам:
-        //
-        //  - Нарушение инкапсуляции: Данные (в `MatchScore`) и поведение (в `MatchScoreCalculationService`) полностью разделены.
-            //  Любой другой сервис может так же напрямую изменить счёт матча, и объект `MatchScore` не сможет себя защитить.
-        //  - Процедурный стиль: Вместо объектно-ориентированного подхода, где объекты сами управляют своим состоянием
-            //  (и начисление очков происходит в духе `matchScore.setPlayerOnePoints(...)`), получается процедурный код,
-            //  который манипулирует внешними структурами данных.
-        //  - Жёсткая связанность (Tight Coupling) и низкая связность (Low Cohesion):
-            //  Сервис тесно связан с внутренним устройством `OngoingMatch`. При этом логика,
-            //  относящаяся к одному понятию (счёт), размазана по разным классам (модели и сервису).
-        //  - Сложность тестирования: Чтобы протестировать один конкретный сценарий (например, переход от "ровно" к "преимуществу"),
-            //  нужно разбираться во множестве `if` и переходов по методам. Это сложно и хрупко.
-        //
-        // Как исправить: Провести рефакторинг классов моделей с переходом к "богатой" доменной модели.
+    // Объекты, которыми он оперирует (`MatchScore`, `OngoingMatch`), являются "анемичными" моделями —
+    // простыми контейнерами данных практически без собственного поведения. Сервис напрямую читает и записывает их поля.
+    // Это главная архитектурная проблема этой части логики. По этим причинам:
+    //
+    //  - Нарушение инкапсуляции: Данные (в `MatchScore`) и поведение (в `MatchScoreCalculationService`) полностью разделены.
+    //  Любой другой сервис может так же напрямую изменить счёт матча, и объект `MatchScore` не сможет себя защитить.
+    //  - Процедурный стиль: Вместо объектно-ориентированного подхода, где объекты сами управляют своим состоянием
+    //  (и начисление очков происходит в духе `matchScore.setPlayerOnePoints(...)`), получается процедурный код,
+    //  который манипулирует внешними структурами данных.
+    //  - Жёсткая связанность (Tight Coupling) и низкая связность (Low Cohesion):
+    //  Сервис тесно связан с внутренним устройством `OngoingMatch`. При этом логика,
+    //  относящаяся к одному понятию (счёт), размазана по разным классам (модели и сервису).
+    //  - Сложность тестирования: Чтобы протестировать один конкретный сценарий (например, переход от "ровно" к "преимуществу"),
+    //  нужно разбираться во множестве `if` и переходов по методам. Это сложно и хрупко.
+    //
+    // Как исправить: Провести рефакторинг классов моделей с переходом к "богатой" доменной модели.
 
     // TODO: Сервис слишком много знает о внутреннем устройстве класса OngoingMatch, а также полностью управляет внутренним состоянием MatchScore,
-        // что повышает связанность кода и делает его сложнее в поддержке и рефакторинге.
-        // Решение — реализация методов для работы с собственными данными в классах доменной модели.
-        // Также имеет смысл перейти на реализацию в ООП стиле — провести детальную декомпозицию предметной области,
-        // выделить соответствующие абстракции и наделить их нужным состоянием и поведением.
+    // что повышает связанность кода и делает его сложнее в поддержке и рефакторинге.
+    // Решение — реализация методов для работы с собственными данными в классах доменной модели.
+    // Также имеет смысл перейти на реализацию в ООП стиле — провести детальную декомпозицию предметной области,
+    // выделить соответствующие абстракции и наделить их нужным состоянием и поведением.
 
     // TODO: Класс "кодирует" счёт в гейме, что способствует процедурному стилю. Поскольку в гейме особый счёт,
-        // ООП подходом было бы создать специальный enum с константами ZERO, FIFTEEN, THIRTY, FORTY, ADVANTAGE для хранения счёта в гейме.
+    // ООП подходом было бы создать специальный enum с константами ZERO, FIFTEEN, THIRTY, FORTY, ADVANTAGE для хранения счёта в гейме.
 
     // Составные условия из `if` требуют усилий для понимания. Сложные логические выражения ухудшают читаемость кода
-        // и увеличивают вероятность ошибки при их написании или изменении. Лучше выносить такие условия
-        // в отдельный `private`-метод с понятным названием, которое описывает бизнес-правило.
+    // и увеличивают вероятность ошибки при их написании или изменении. Лучше выносить такие условия
+    // в отдельный `private`-метод с понятным названием, которое описывает бизнес-правило.
+
+    private static final Logger log = LoggerFactory.getLogger(MatchScoreCalculationService.class);
 
     private static final int POINTS_DEUCE_THRESHOLD = 3;
     private static final int GAMES_TO_WIN_SET = 6;
@@ -47,8 +49,6 @@ public class MatchScoreCalculationService {
     private static final int TIEBREAK_POINTS_TO_WIN = 7;
     private static final int TIEBREAK_MIN_DIFFERENCE = 2;
     private static final int SETS_TO_WIN_MATCH = 2;
-
-    private static final Logger log = LoggerFactory.getLogger(MatchScoreCalculationService.class);
 
     public static void addPoint(OngoingMatch match, int playerNumber) {
         if (match.isMatchOver()) {
@@ -78,16 +78,17 @@ public class MatchScoreCalculationService {
                 match.setDeuce(true);
 
                 // Здесь уже два уровня вложенности (if внутри if) и вызывается метод, в котором в свою очередь тоже
-                    // ветвистая if-else логика с двумя уровнями вложенности — такой код сложно читать, тестировать и поддерживать.
+                // ветвистая if-else логика с двумя уровнями вложенности — такой код сложно читать, тестировать и поддерживать.
                 handleDeuce(match, isPlayerOne);
             } else {
                 winGame(match, isPlayerOne);
             }
         } else {
-
-            // Тело блоков if-else всегда следует оборачивать в {}
-            if (isPlayerOne) score.setPlayerOnePoints(scoringPoints + 1);
-            else score.setPlayerTwoPoints(scoringPoints + 1);
+            if (isPlayerOne) {
+                score.setPlayerOnePoints(scoringPoints + 1);
+            } else {
+                score.setPlayerTwoPoints(scoringPoints + 1);
+            }
         }
     }
 
@@ -142,9 +143,11 @@ public class MatchScoreCalculationService {
         resetAdvantage(score);
         match.setDeuce(false);
 
-        // Тело блоков if-else всегда следует оборачивать в {}
-        if (isPlayerOne) score.setPlayerOneGames(oldPlayerOneGames + 1);
-        else score.setPlayerTwoGames(oldPlayerTwoGames + 1);
+        if (isPlayerOne) {
+            score.setPlayerOneGames(oldPlayerOneGames + 1);
+        } else {
+            score.setPlayerTwoGames(oldPlayerTwoGames + 1);
+        }
         log.debug("Player {} wins game. Games: {}-{}", isPlayerOne ? "1" : "2",
                 score.getPlayerOneGames(), score.getPlayerTwoGames());
         checkSetWinner(match);
@@ -154,7 +157,7 @@ public class MatchScoreCalculationService {
         MatchScore score = match.getScore();
 
         // Названия p1Games и p2Games сложнее перепутать при чтении и использовании, чем например firstPlayerGames и secondPlayerGames.
-            // Лучше давать переменным полные и легко читаемые имена.
+        // Лучше давать переменным полные и легко читаемые имена.
         int p1Games = score.getPlayerOneGames();
         int p2Games = score.getPlayerTwoGames();
 
@@ -170,8 +173,11 @@ public class MatchScoreCalculationService {
         MatchScore score = match.getScore();
 
         // Тело блоков if-else всегда следует оборачивать в {}
-        if (isPlayerOne) score.setPlayerOneSets(score.getPlayerOneSets() + 1);
-        else score.setPlayerTwoSets(score.getPlayerTwoSets() + 1);
+        if (isPlayerOne) {
+            score.setPlayerOneSets(score.getPlayerOneSets() + 1);
+        } else {
+            score.setPlayerTwoSets(score.getPlayerTwoSets() + 1);
+        }
 
         log.debug("Player {} wins set. Sets: {}-{}", isPlayerOne ? "1" : "2",
                 score.getPlayerOneSets(), score.getPlayerTwoSets());

@@ -19,19 +19,20 @@ public class FinishedMatchesController extends HttpServlet {
 
     // TODO: Зависимость `FinishedMatchesPersistenceService` создаётся напрямую в месте объявления. Вместо этого стоит внедрять зависимости через `init()` метод сервлета.
 
-    // Все повторяющиеся или важные строковые литералы лучше вынести в `private static final` константы с понятными именами.
-        // Именованная константа делает код более семантически понятным.
-
-    private final FinishedMatchesPersistenceServiceImpl service = new FinishedMatchesPersistenceServiceImpl();
-
-    // Константы объявляются первыми (пишутся в самом верху) в классе. long DEFAULT_PAGE_NUMBER, а также Logger log должны быть выше FinishedMatchesPersistenceService service
     private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final Logger log = LoggerFactory.getLogger(FinishedMatchesController.class);
+    private static final String PARAM_FILTER = "filter_by_player_name";
+    private static final String PARAM_PAGE = "page";
+    private static final String ATTR_MATCHES = "matches";
+    private static final String ATTR_TOTAL_PAGES = "totalPages";
+    private static final String ATTR_CURRENT_PAGE = "currentPage";
+    private static final String VIEW_MATCHES = "/WEB-INF/jsp/matches.jsp";
+    private final FinishedMatchesPersistenceServiceImpl service = new FinishedMatchesPersistenceServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String playerName = request.getParameter("filter_by_player_name");
-        String pageNumberParam = request.getParameter("page");
+        String playerName = request.getParameter(PARAM_FILTER);
+        String pageNumberParam = request.getParameter(PARAM_PAGE);
         log.info("GET /matches with filter='{}', page='{}'", playerName, pageNumberParam);
         long page = DEFAULT_PAGE_NUMBER;
         if (pageNumberParam != null) {
@@ -42,10 +43,10 @@ public class FinishedMatchesController extends HttpServlet {
         PaginationResponseDto<MatchDto> result = service.getFinishedMatches(playerName, page);
 
         // Данные о странице передаются по частям (хотя для этого есть специальный PaginationResponseDto). Лучше передавать сам DTO (и добавить в него currentPage)
-        request.setAttribute("matches", result.items());
-        request.setAttribute("totalPages", result.totalPages());
-        request.setAttribute("currentPage", page);
+        request.setAttribute(ATTR_MATCHES, result.items());
+        request.setAttribute(ATTR_TOTAL_PAGES, result.totalPages());
+        request.setAttribute(ATTR_CURRENT_PAGE, page);
         log.debug("Found {} matches, totalPages={}", result.items().size(), result.totalPages());
-        request.getRequestDispatcher("/WEB-INF/jsp/matches.jsp").forward(request, response);
+        request.getRequestDispatcher(VIEW_MATCHES).forward(request, response);
     }
 }

@@ -6,7 +6,6 @@ import com.example.tennisscoreboard.model.OngoingMatch;
 
 public class MatchScoreDisplayMapper {
 
-    // После рефакторинга MatchScoreDisplayDto этот метод тоже должен будет измениться соответствующим образом.
     public static ScoreDto toDisplayDto(OngoingMatch match) {
         MatchScore score = match.getScore();
 
@@ -32,20 +31,23 @@ public class MatchScoreDisplayMapper {
     }
 
     // Метод раскодирует количество очков в реальный счёт в гейме. Обязанность хранить счёт в корректных величинах лежит на доменной модели.
-        // Это исправится автоматически после проведения декомпозиции и рефакторинга доменных моделей.
+    // Это исправится автоматически после проведения декомпозиции и рефакторинга доменных моделей.
     private static String formatPoints(int points, boolean advantage, boolean opponentAdvantage) {
-        // Тело блоков if-else всегда следует оборачивать в {}
-        if (advantage) return "AD";
+        if (advantage) {
+            return "AD";
+        }
 
-        // Тело блоков if-else всегда следует оборачивать в {}
-        if (opponentAdvantage) return "40";
+        if (opponentAdvantage) {
+            return "40";
+        }
 
         return switch (points) {
             case 0 -> "0";
             case 1 -> "15";
             case 2 -> "30";
             case 3 -> "40";
-            default -> "40"; // По умолчанию не должно возвращаться значение 40. В текущей реализации здесь должно выбрасываться исплючение.
+            default ->
+                    "40"; // По умолчанию не должно возвращаться значение 40. В текущей реализации здесь должно выбрасываться исплючение.
         };
     }
 }
