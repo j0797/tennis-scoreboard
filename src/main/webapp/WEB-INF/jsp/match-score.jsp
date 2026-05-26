@@ -38,7 +38,7 @@
 
         <c:choose>
             <c:when test="${matchOver}">
-                <h2>Match Over! Winner: ${match.winner.name}</h2>
+                <h2>Match Over! Winner: ${displayDto.winnerName}</h2>
             </c:when>
         </c:choose>
 
@@ -57,7 +57,7 @@
                 </thead>
                 <tbody>
                 <tr class="player1">
-                    <td class="table-text">${match.playerOne.name}</td>
+                    <td class="table-text">${displayDto.playerOneName}</td>
                     <td class="table-text">${displayDto.sets.split(':')[0]}</td>
                     <td class="table-text">${displayDto.games.split(':')[0]}</td>
                     <td class="table-text">
@@ -80,7 +80,7 @@
                     </c:if>
                 </tr>
                 <tr class="player2">
-                    <td class="table-text">${match.playerTwo.name}</td>
+                    <td class="table-text">${displayDto.playerTwoName}</td>
                     <td class="table-text">${displayDto.sets.split(':')[1]}</td>
                     <td class="table-text">${displayDto.games.split(':')[1]}</td>
                     <td class="table-text">

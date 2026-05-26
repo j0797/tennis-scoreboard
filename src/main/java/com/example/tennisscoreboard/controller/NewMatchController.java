@@ -1,6 +1,5 @@
 package com.example.tennisscoreboard.controller;
 
-import com.example.tennisscoreboard.entity.Player;
 import com.example.tennisscoreboard.exception.ValidationException;
 import com.example.tennisscoreboard.service.impl.OngoingMatchesServiceImpl;
 import com.example.tennisscoreboard.service.impl.PlayerServiceImpl;
@@ -73,11 +72,7 @@ public class NewMatchController extends HttpServlet {
                 throw new ValidationException("Player names must be different");
             }
 
-            // TODO: Сервлет не должен работать с Entity — эта логика должна быть в сервисе
-            // Лучше давать переменным полные имена.
-            Player p1 = playerService.findOrCreatePlayer(playerOneName);
-            Player p2 = playerService.findOrCreatePlayer(playerTwoName);
-            UUID matchId = OngoingMatchesServiceImpl.createMatch(p1, p2);
+            UUID matchId = OngoingMatchesServiceImpl.createMatch(playerOneName, playerTwoName);
             log.info("Match created with id {}", matchId);
             response.sendRedirect(request.getContextPath() + "/match-score?uuid=" + matchId);
 

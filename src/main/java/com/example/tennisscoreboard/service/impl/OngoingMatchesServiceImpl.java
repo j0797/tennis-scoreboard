@@ -1,7 +1,5 @@
 package com.example.tennisscoreboard.service.impl;
-
-import com.example.tennisscoreboard.entity.Player;
-import com.example.tennisscoreboard.model.OngoingMatch;
+import com.example.tennisscoreboard.model.TennisMatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,24 +13,23 @@ public class OngoingMatchesServiceImpl {
 
     // Лучше создавать экземпляр этого сервиса (и использовать через интерфейс), чем использовать его как утилитный класс. Так можно будет проще заменить реализацию.
 
-    private static final Map<UUID, OngoingMatch> ongoingMatches = new ConcurrentHashMap<>();
+    private static final Map<UUID, TennisMatch> ongoingMatches = new ConcurrentHashMap<>();
     private static final Logger log = LoggerFactory.getLogger(OngoingMatchesServiceImpl.class);
 
     // TODO: Метод должен имена игроков в String или DTO с именами игроков. Использование JPA Entity (Player) в этом сервисе жёстко связывает его со слоем персистентности и нарушает архитектурные границы.
-    public static UUID createMatch(Player playerOne, Player playerTwo) {
+    public static UUID createMatch(String playerOneName, String playerTwoName) {
         UUID matchId = UUID.randomUUID();
-        ongoingMatches.put(matchId, new OngoingMatch(playerOne, playerTwo));
-        log.info("New match created with id {}: {} vs {}", matchId, playerOne.getName(), playerTwo.getName());
+        ongoingMatches.put(matchId, new TennisMatch(new com.example.tennisscoreboard.model.Player(null, playerOneName),
+                new com.example.tennisscoreboard.model.Player(null, playerTwoName)));
         return matchId;
     }
 
-    public static OngoingMatch getOngoingMatch(UUID matchId) {
-        log.debug("Fetching ongoing match with id {}", matchId);
+    public static TennisMatch getOngoingMatch(UUID matchId) {
         return ongoingMatches.get(matchId);
     }
 
     public static void addPoint(UUID matchId, int playerNumber) {
-        OngoingMatch match = ongoingMatches.get(matchId);
+        TennisMatch match = ongoingMatches.get(matchId);
         if (match == null) {
             log.warn("Ongoing match not found: {}", matchId);
             return;
@@ -41,22 +38,13 @@ public class OngoingMatchesServiceImpl {
 
         // TODO: MatchScoreCalculationService лучше внедрять через конструктор, чтобы следовать принципу Dependency Injection (DI) и эта зависимость была более явной.
         // Запускать начисление очка лучше в методе compute объекта ConcurrentHashMap
-        MatchScoreCalculationService.addPoint(match, playerNumber);
+        match.scorePoint(playerNumber);
+        if (match.isOver()) {
+            log.info("Match {} finished. Winner: {}", matchId, match.winner().name());
 
-        if (match.isMatchOver()) {
-
-            // TODO: Логика определения победителя должна находиться в самой доменной модели матча
-            match.setWinner(playerNumber == 1 ? match.getPlayerOne() : match.getPlayerTwo());
-            log.info("Match {} finished. Winner: {} ({}:{}, {}:{})",
-                    matchId, match.getWinner().getName(),
-                    match.getScore().getPlayerOneSets(), match.getScore().getPlayerTwoSets(),
-                    match.getScore().getPlayerOneGames(), match.getScore().getPlayerTwoGames());
-
-            // TODO: Создавать объект FinishedMatchesPersistenceService при каждом вызове этого метода (при каждом выигранном очке) крайне избыточно.
-            FinishedMatchesPersistenceServiceImpl persistence = new FinishedMatchesPersistenceServiceImpl();
-
-            // TODO: Обязанность запускать сохранение завершённых матчей нарушает SRP этого класса. Эта ответственность должна лежать на внешнем коде, например, сервисе-оркестраторе.
-            persistence.save(match);
+            // TODO: restore in commit 5 - save finished match to DB
+            // FinishedMatchesPersistenceServiceImpl persistence = new FinishedMatchesPersistenceServiceImpl();
+            // persistence.save(match);
 
             // TODO: Удаление матча из хранилища (как и сохранение его в БД) из метода addPoint является побочным эффектом и нарушает Принцип наименьшего удивления. (см. файл "Принцип наименьшего удивления (Principle of Least Astonishment, POLA).md" в этом же пакете)
             ongoingMatches.remove(matchId);

@@ -3,7 +3,7 @@ package com.example.tennisscoreboard.controller;
 import com.example.tennisscoreboard.dto.ScoreDto;
 import com.example.tennisscoreboard.exception.NotFoundException;
 import com.example.tennisscoreboard.mapper.MatchScoreDisplayMapper;
-import com.example.tennisscoreboard.model.OngoingMatch;
+import com.example.tennisscoreboard.model.TennisMatch;
 import com.example.tennisscoreboard.service.impl.OngoingMatchesServiceImpl;
 import com.example.tennisscoreboard.util.Validator;
 import jakarta.servlet.ServletException;
@@ -51,17 +51,14 @@ public class MatchScoreController extends HttpServlet {
 
         // OngoingMatchesService лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
         // Сервлет не должен работать с доменными моделями
-        OngoingMatch ongoingMatch = OngoingMatchesServiceImpl.getOngoingMatch(id);
-        if (ongoingMatch == null) {
+        TennisMatch tennisMatch = OngoingMatchesServiceImpl.getOngoingMatch(id);
+        if (tennisMatch == null) {
             throw new NotFoundException("Match not found");
         }
 
         // MatchScoreDisplayMapper лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
-        ScoreDto displayDto = MatchScoreDisplayMapper.toDisplayDto(ongoingMatch);
+        ScoreDto displayDto = MatchScoreDisplayMapper.toDisplayDto(tennisMatch);
         request.setAttribute(ATTR_DISPLAY_DTO, displayDto);
-
-        // Сервлет не должен передавать доменные модели во View
-        request.setAttribute("match", ongoingMatch);
         request.getRequestDispatcher(VIEW_MATCH_SCORE).forward(request, response);
     }
 
@@ -80,7 +77,7 @@ public class MatchScoreController extends HttpServlet {
         // OngoingMatchesService лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
         // Сервлет не должен работать с доменными моделями
         // Здесь переменная OngoingMatch называется match, а в методе doGet называется ongoingMatch. Лучше придерживаться одного подхода в именовании.
-        OngoingMatch match = OngoingMatchesServiceImpl.getOngoingMatch(id);
+        TennisMatch match = OngoingMatchesServiceImpl.getOngoingMatch(id);
         if (match == null) {
             log.warn("Match not found for uuid {}", id);
 
@@ -91,15 +88,12 @@ public class MatchScoreController extends HttpServlet {
         // OngoingMatchesService лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
         OngoingMatchesServiceImpl.addPoint(id, player);
 
-        if (match.isMatchOver()) {
+        if (match.isOver()) {
             log.info("Match {} finished after point by player {}", id, player);
 
             // MatchScoreDisplayMapper лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
             ScoreDto displayDto = MatchScoreDisplayMapper.toDisplayDto(match);
             request.setAttribute(ATTR_DISPLAY_DTO, displayDto);
-
-            // Сервлет не должен передавать доменные модели во View
-            request.setAttribute("match", match);
             request.setAttribute(ATTR_MATCH_OVER, true);
             request.getRequestDispatcher(VIEW_MATCH_SCORE).forward(request, response);
         } else {

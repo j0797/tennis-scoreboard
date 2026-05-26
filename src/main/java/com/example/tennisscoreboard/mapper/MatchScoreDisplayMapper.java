@@ -1,53 +1,50 @@
 package com.example.tennisscoreboard.mapper;
 
 import com.example.tennisscoreboard.dto.ScoreDto;
-import com.example.tennisscoreboard.model.MatchScore;
-import com.example.tennisscoreboard.model.OngoingMatch;
+import com.example.tennisscoreboard.model.*;
 
 public class MatchScoreDisplayMapper {
 
-    public static ScoreDto toDisplayDto(OngoingMatch match) {
-        MatchScore score = match.getScore();
+    public static ScoreDto toDisplayDto(TennisMatch match) {
+        SetScore currentSet = match.getCurrentSet();
 
-        String points1 = formatPoints(
-                score.getPlayerOnePoints(),
-                score.isPlayerOneAdvantage(),
-                score.isPlayerTwoAdvantage()
+        String points1, points2;
+        if (match.isOver()) {
+            points1 = "0";
+            points2 = "0";
+        } else if (currentSet.isTiebreak()) {
+            TiebreakGame tb = currentSet.getTiebreakGame();
+            points1 = String.valueOf(tb.getPointsOne());
+            points2 = String.valueOf(tb.getPointsTwo());
+        } else {
+            GameScore currentGame = currentSet.getCurrentGameScore();
+            points1 = formatPoints(currentGame.getPlayerOne());
+            points2 = formatPoints(currentGame.getPlayerTwo());
+        }
+
+        String games = currentSet.getGamesOne() + ":" + currentSet.getGamesTwo();
+        String sets = match.getSetsOne() + ":" + match.getSetsTwo();
+        String winnerName = match.isOver() ? match.winner().name() : null;
+
+        return new ScoreDto(
+                match.getPlayerOne().name(),
+                match.getPlayerTwo().name(),
+                winnerName,
+                points1, points2,
+                games, sets,
+                !match.isOver() && currentSet.isTiebreak(),
+                null
         );
-        String points2 = formatPoints(
-                score.getPlayerTwoPoints(),
-                score.isPlayerTwoAdvantage(),
-                score.isPlayerOneAdvantage()
-        );
-
-        String games = score.getPlayerOneGames() + ":" + score.getPlayerTwoGames();
-        String sets = score.getPlayerOneSets() + ":" + score.getPlayerTwoSets();
-
-        String tieBreakPoints = match.isTieBreak()
-                ? (score.getPlayerOneTieBreakPoints() + ":" + score.getPlayerTwoTieBreakPoints())
-                : null;
-
-        return new ScoreDto(points1, points2, games, sets, match.isTieBreak(), tieBreakPoints);
     }
 
-    // Метод раскодирует количество очков в реальный счёт в гейме. Обязанность хранить счёт в корректных величинах лежит на доменной модели.
-    // Это исправится автоматически после проведения декомпозиции и рефакторинга доменных моделей.
-    private static String formatPoints(int points, boolean advantage, boolean opponentAdvantage) {
-        if (advantage) {
-            return "AD";
-        }
-
-        if (opponentAdvantage) {
-            return "40";
-        }
-
+    private static String formatPoints(Points points) {
         return switch (points) {
-            case 0 -> "0";
-            case 1 -> "15";
-            case 2 -> "30";
-            case 3 -> "40";
-            default ->
-                    "40"; // По умолчанию не должно возвращаться значение 40. В текущей реализации здесь должно выбрасываться исплючение.
+            case LOVE -> "0";
+            case FIFTEEN -> "15";
+            case THIRTY -> "30";
+            case FORTY -> "40";
+            case ADVANTAGE -> "AD";
+            case WON -> throw new IllegalStateException("WON is not a displayable point value");
         };
     }
 }

@@ -5,8 +5,8 @@ import com.example.tennisscoreboard.dto.MatchDto;
 import com.example.tennisscoreboard.dto.PaginationResponseDto;
 import com.example.tennisscoreboard.entity.Match;
 import com.example.tennisscoreboard.mapper.MatchMapper;
-import com.example.tennisscoreboard.mapper.OngoingMatchMapper;
-import com.example.tennisscoreboard.model.OngoingMatch;
+// import com.example.tennisscoreboard.mapper.OngoingMatchMapper;
+// import com.example.tennisscoreboard.model.OngoingMatch;
 import com.example.tennisscoreboard.util.HibernateUtil;
 import org.hibernate.SessionFactory;
 
@@ -22,16 +22,17 @@ public class FinishedMatchesPersistenceServiceImpl {
 
     private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
     private final MatchDao matchDao = new MatchDao(sessionFactory);
-    private final OngoingMatchMapper mapper = OngoingMatchMapper.INSTANCE;
+    // private final OngoingMatchMapper mapper = OngoingMatchMapper.INSTANCE;
 
     // Константы объявляются первыми (пишутся в самом верху) в классе.
     // Размер страницы по умолчанию более уместно хранить в сервлете, так как в идеале он должен приходить с фронтенда. А сервис должен принимать это значение в качестве аргумента в методы.
     private static final int DEFAULT_PAGE_SIZE = 5;
 
-    public void save(OngoingMatch match) {
-        Match finishedMatch = mapper.toEntity(match);
-        matchDao.save(finishedMatch);
-    }
+    // TODO: adapt to TennisMatch later!
+    // public void save(OngoingMatch match) {
+    //    Match finishedMatch = mapper.toEntity(match);
+    //    matchDao.save(finishedMatch);
+    //}
 
     // Логику форматирования имени и рассчёта offset и totalPages можно вынести во вспомогательные private методы. Так код станет более читаемым.
     public PaginationResponseDto<MatchDto> getFinishedMatches(String playerName, Long currentPage) {
@@ -42,7 +43,7 @@ public class FinishedMatchesPersistenceServiceImpl {
         }
         int offset = (int) ((currentPage - 1) * pageSize);
 
-        Long totalMatches;
+        long totalMatches;
         List<Match> matches;
 
         if (formattedName == null || formattedName.isBlank()) {
