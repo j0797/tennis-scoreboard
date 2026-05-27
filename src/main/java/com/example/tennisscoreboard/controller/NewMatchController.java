@@ -1,12 +1,20 @@
 package com.example.tennisscoreboard.controller;
 
+import com.example.tennisscoreboard.dao.MatchDao;
+import com.example.tennisscoreboard.dao.PlayerDao;
 import com.example.tennisscoreboard.exception.ValidationException;
+import com.example.tennisscoreboard.service.FinishedMatchesPersistenceService;
+import com.example.tennisscoreboard.service.OngoingMatchesService;
+import com.example.tennisscoreboard.service.PlayerService;
+import com.example.tennisscoreboard.service.impl.FinishedMatchesPersistenceServiceImpl;
 import com.example.tennisscoreboard.service.impl.OngoingMatchesServiceImpl;
 import com.example.tennisscoreboard.service.impl.PlayerServiceImpl;
+import com.example.tennisscoreboard.util.HibernateUtil;
 import com.example.tennisscoreboard.util.Validator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,21 +23,6 @@ import java.util.UUID;
 
 @WebServlet("/new-match")
 public class NewMatchController extends HttpServlet {
-
-    // TODO: Зависимость `PlayerService` создаётся напрямую в месте объявления. Вместо этого стоит внедрять зависимости через `init()` метод сервлета.
-
-    // TODO: После валидации имён игроков, сервлет получает JPA Entity игроков (`Player`) из `PlayerService` только для того, чтобы передать их в `OngoingMatchesService.createMatch(p1, p2)`.
-    // Это нарушает границы между слоями приложения и Принцип разделения ответственности
-    // (см. файл "Принцип разделения ответственности (Separation of Concerns).md" в этом же пакете).
-    // Сервлет не должен работать с JPA сущностями и знать о существовании класса `Player` — ему это не нужно для выполнения его задачи.
-    // Он должен общаться с сервисным слоем исключительно через объекты передачи данных (DTO).
-    //
-    // Сервисный слой должен возвращать только те данные, которые необходимы контроллеру.
-    // В данном случае, сервлету нужен только ID созданного матча для редиректа.
-    // Идеальная картина для него — использовать только один сервис (например, `OngoingMatchesService`) —
-    // отправлять ему входящие данные и получать ответ, который нужно отдать в представление.
-    // А логикой создания матча пусть управляет сервисный слой. Такой рефакторинг сделает контроллер "тонким"
-    // и его единственной задачей останется обработка HTTP и делегирование бизнес-запроса сервисному слою.
 
     // TODO: Сервлет отправляет сообщение из исключения (`e.getMessage()`) напрямую пользователю для `ValidateException`.
     // Сообщения об ошибках из исключений могут содержать технические детали, которые не предназначены
@@ -48,7 +41,18 @@ public class NewMatchController extends HttpServlet {
     private static final String PARAM_PLAYER_TWO = "playerTwoName";
     private static final String ATTR_ERROR = "error";
     private static final String VIEW_NEW_MATCH = "/WEB-INF/jsp/new-match.jsp";
-    private final PlayerServiceImpl playerService = new PlayerServiceImpl();
+    private OngoingMatchesService ongoingMatchesService;
+
+    @Override
+    public void init() {
+        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+        PlayerDao playerDao = new PlayerDao(sessionFactory);
+        MatchDao matchDao = new MatchDao(sessionFactory);
+        PlayerService playerService = new PlayerServiceImpl(playerDao);
+        FinishedMatchesPersistenceService persistenceService =
+                new FinishedMatchesPersistenceServiceImpl(matchDao, playerService);
+        this.ongoingMatchesService = new OngoingMatchesServiceImpl(persistenceService);
+    }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -72,7 +76,7 @@ public class NewMatchController extends HttpServlet {
                 throw new ValidationException("Player names must be different");
             }
 
-            UUID matchId = OngoingMatchesServiceImpl.createMatch(playerOneName, playerTwoName);
+            UUID matchId = ongoingMatchesService.createMatch(playerOneName, playerTwoName);
             log.info("Match created with id {}", matchId);
             response.sendRedirect(request.getContextPath() + "/match-score?uuid=" + matchId);
 

@@ -1,16 +1,25 @@
 package com.example.tennisscoreboard.controller;
 
+import com.example.tennisscoreboard.dao.MatchDao;
+import com.example.tennisscoreboard.dao.PlayerDao;
 import com.example.tennisscoreboard.dto.ScoreDto;
 import com.example.tennisscoreboard.exception.NotFoundException;
 import com.example.tennisscoreboard.mapper.MatchScoreDisplayMapper;
 import com.example.tennisscoreboard.model.TennisMatch;
+import com.example.tennisscoreboard.service.FinishedMatchesPersistenceService;
+import com.example.tennisscoreboard.service.OngoingMatchesService;
+import com.example.tennisscoreboard.service.PlayerService;
+import com.example.tennisscoreboard.service.impl.FinishedMatchesPersistenceServiceImpl;
 import com.example.tennisscoreboard.service.impl.OngoingMatchesServiceImpl;
+import com.example.tennisscoreboard.service.impl.PlayerServiceImpl;
+import com.example.tennisscoreboard.util.HibernateUtil;
 import com.example.tennisscoreboard.util.Validator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,14 +28,6 @@ import java.util.UUID;
 
 @WebServlet("/match-score")
 public class MatchScoreController extends HttpServlet {
-
-    // TODO: Зависимости используются через прямое обращение к сервисам из методов. Вместо этого стоит внедрять зависимости через `init()` метод сервлета.
-
-    // TODO: Контроллер передаёт в слой представления доменные модели.
-    // Передача доменных моделей в JSP не является хорошей практикой. Это нарушает принцип разделения ответственности между слоями
-    // и связывает слой представления с моделью данных (что чревато ошибками, например, в случае переименования полей).
-    // Лучше использовать DTO (Data Transfer Object) для передачи данных в представление.
-    // DTO позволяют контролировать, какие именно данные передаются.
 
     // TODO: Сервлет берёт на себя лишнюю ответственность — оркестрирует взаимодействие между несколькими сервисами,
     // хотя его задача — только принимать HTTP-запросы и делегировать их обработку. Это нарушает принцип единственной ответственности (SRP)
@@ -40,6 +41,18 @@ public class MatchScoreController extends HttpServlet {
     private static final String ATTR_DISPLAY_DTO = "displayDto";
     private static final String ATTR_MATCH_OVER = "matchOver";
     private static final String VIEW_MATCH_SCORE = "/WEB-INF/jsp/match-score.jsp";
+    private OngoingMatchesService ongoingMatchesService;
+
+    @Override
+    public void init() {
+        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+        PlayerDao playerDao = new PlayerDao(sessionFactory);
+        MatchDao matchDao = new MatchDao(sessionFactory);
+        PlayerService playerService = new PlayerServiceImpl(playerDao);
+        FinishedMatchesPersistenceService persistenceService =
+                new FinishedMatchesPersistenceServiceImpl(matchDao, playerService);
+        this.ongoingMatchesService = new OngoingMatchesServiceImpl(persistenceService);
+    }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -48,15 +61,11 @@ public class MatchScoreController extends HttpServlet {
 
         // Validator лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
         UUID id = Validator.validateUuid(matchIdParam);
-
-        // OngoingMatchesService лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
-        // Сервлет не должен работать с доменными моделями
-        TennisMatch tennisMatch = OngoingMatchesServiceImpl.getOngoingMatch(id);
+        TennisMatch tennisMatch = ongoingMatchesService.getOngoingMatch(id);
         if (tennisMatch == null) {
             throw new NotFoundException("Match not found");
         }
 
-        // MatchScoreDisplayMapper лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
         ScoreDto displayDto = MatchScoreDisplayMapper.toDisplayDto(tennisMatch);
         request.setAttribute(ATTR_DISPLAY_DTO, displayDto);
         request.getRequestDispatcher(VIEW_MATCH_SCORE).forward(request, response);
@@ -74,10 +83,8 @@ public class MatchScoreController extends HttpServlet {
         // Название player должно быть только у объектов типа Player, а остальным переменным стоит подбирать более подходящие названия, сответствующие их типу и смыслу.
         int player = Validator.validatePlayerNumber(playerNumberParam);
 
-        // OngoingMatchesService лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
-        // Сервлет не должен работать с доменными моделями
         // Здесь переменная OngoingMatch называется match, а в методе doGet называется ongoingMatch. Лучше придерживаться одного подхода в именовании.
-        TennisMatch match = OngoingMatchesServiceImpl.getOngoingMatch(id);
+        TennisMatch match = ongoingMatchesService.getOngoingMatch(id);
         if (match == null) {
             log.warn("Match not found for uuid {}", id);
 
@@ -85,13 +92,10 @@ public class MatchScoreController extends HttpServlet {
             throw new NotFoundException("Match not found");
         }
 
-        // OngoingMatchesService лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
-        OngoingMatchesServiceImpl.addPoint(id, player);
+        ongoingMatchesService.addPoint(id, player);
 
         if (match.isOver()) {
             log.info("Match {} finished after point by player {}", id, player);
-
-            // MatchScoreDisplayMapper лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
             ScoreDto displayDto = MatchScoreDisplayMapper.toDisplayDto(match);
             request.setAttribute(ATTR_DISPLAY_DTO, displayDto);
             request.setAttribute(ATTR_MATCH_OVER, true);

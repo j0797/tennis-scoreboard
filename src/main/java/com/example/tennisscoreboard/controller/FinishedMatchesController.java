@@ -1,14 +1,21 @@
 package com.example.tennisscoreboard.controller;
 
+import com.example.tennisscoreboard.dao.MatchDao;
+import com.example.tennisscoreboard.dao.PlayerDao;
 import com.example.tennisscoreboard.dto.MatchDto;
 import com.example.tennisscoreboard.dto.PaginationResponseDto;
+import com.example.tennisscoreboard.service.FinishedMatchesPersistenceService;
+import com.example.tennisscoreboard.service.PlayerService;
 import com.example.tennisscoreboard.service.impl.FinishedMatchesPersistenceServiceImpl;
+import com.example.tennisscoreboard.service.impl.PlayerServiceImpl;
+import com.example.tennisscoreboard.util.HibernateUtil;
 import com.example.tennisscoreboard.util.Validator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +23,6 @@ import java.io.IOException;
 
 @WebServlet("/matches")
 public class FinishedMatchesController extends HttpServlet {
-
-    // TODO: Зависимость `FinishedMatchesPersistenceService` создаётся напрямую в месте объявления. Вместо этого стоит внедрять зависимости через `init()` метод сервлета.
 
     private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final Logger log = LoggerFactory.getLogger(FinishedMatchesController.class);
@@ -27,7 +32,17 @@ public class FinishedMatchesController extends HttpServlet {
     private static final String ATTR_TOTAL_PAGES = "totalPages";
     private static final String ATTR_CURRENT_PAGE = "currentPage";
     private static final String VIEW_MATCHES = "/WEB-INF/jsp/matches.jsp";
-    private final FinishedMatchesPersistenceServiceImpl service = new FinishedMatchesPersistenceServiceImpl();
+    private static final int DEFAULT_PAGE_SIZE = 5;
+    private FinishedMatchesPersistenceService persistenceService;
+
+    @Override
+    public void init() {
+        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+        PlayerDao playerDao = new PlayerDao(sessionFactory);
+        MatchDao matchDao = new MatchDao(sessionFactory);
+        PlayerService playerService = new PlayerServiceImpl(playerDao);
+        this.persistenceService = new FinishedMatchesPersistenceServiceImpl(matchDao, playerService);
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -40,7 +55,7 @@ public class FinishedMatchesController extends HttpServlet {
             // Validator лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
             page = Validator.validatePage(pageNumberParam);
         }
-        PaginationResponseDto<MatchDto> result = service.getFinishedMatches(playerName, page);
+        PaginationResponseDto<MatchDto> result = persistenceService.getFinishedMatches(playerName, page, DEFAULT_PAGE_SIZE);
 
         // Данные о странице передаются по частям (хотя для этого есть специальный PaginationResponseDto). Лучше передавать сам DTO (и добавить в него currentPage)
         request.setAttribute(ATTR_MATCHES, result.items());
