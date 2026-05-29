@@ -60,7 +60,7 @@ public class MatchScoreController extends HttpServlet {
         log.debug("GET match-score with uuid={}", matchIdParam);
 
         // Validator лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
-        UUID id = Validator.validateUuid(matchIdParam);
+        UUID id = Validator.parseUuid(matchIdParam);
         TennisMatch tennisMatch = ongoingMatchesService.getOngoingMatch(id);
         if (tennisMatch == null) {
             throw new NotFoundException("Match not found");
@@ -78,10 +78,10 @@ public class MatchScoreController extends HttpServlet {
         log.info("POST match-score: match={}, player={}", matchIdParam, playerNumberParam);
 
         // Validator лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
-        UUID id = Validator.validateUuid(matchIdParam);
+        UUID id = Validator.parseUuid(matchIdParam);
 
         // Название player должно быть только у объектов типа Player, а остальным переменным стоит подбирать более подходящие названия, сответствующие их типу и смыслу.
-        int player = Validator.validatePlayerNumber(playerNumberParam);
+        int player = Validator.parsePlayerNumber(playerNumberParam);
 
         // Здесь переменная OngoingMatch называется match, а в методе doGet называется ongoingMatch. Лучше придерживаться одного подхода в именовании.
         TennisMatch match = ongoingMatchesService.getOngoingMatch(id);

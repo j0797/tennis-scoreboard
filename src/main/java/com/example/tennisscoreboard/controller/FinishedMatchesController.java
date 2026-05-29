@@ -24,7 +24,6 @@ import java.io.IOException;
 @WebServlet("/matches")
 public class FinishedMatchesController extends HttpServlet {
 
-    private static final long DEFAULT_PAGE_NUMBER = 1L;
     private static final Logger log = LoggerFactory.getLogger(FinishedMatchesController.class);
     private static final String PARAM_FILTER = "filter_by_player_name";
     private static final String PARAM_PAGE = "page";
@@ -49,11 +48,11 @@ public class FinishedMatchesController extends HttpServlet {
         String playerName = request.getParameter(PARAM_FILTER);
         String pageNumberParam = request.getParameter(PARAM_PAGE);
         log.info("GET /matches with filter='{}', page='{}'", playerName, pageNumberParam);
-        long page = DEFAULT_PAGE_NUMBER;
+        long page = Validator.parsePage(pageNumberParam);
         if (pageNumberParam != null) {
 
             // Validator лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
-            page = Validator.validatePage(pageNumberParam);
+            page = Validator.parsePage(pageNumberParam);
         }
         PaginationResponseDto<MatchDto> result = persistenceService.getFinishedMatches(playerName, page, DEFAULT_PAGE_SIZE);
 
