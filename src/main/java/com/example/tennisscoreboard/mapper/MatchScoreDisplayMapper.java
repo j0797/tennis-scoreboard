@@ -25,6 +25,9 @@ public class MatchScoreDisplayMapper {
         String games = currentSet.getGamesOne() + ":" + currentSet.getGamesTwo();
         String sets = match.getSetsOne() + ":" + match.getSetsTwo();
         String winnerName = match.isOver() ? match.winner().name() : null;
+        String tieBreakPoints = (!match.isOver() && currentSet.isTiebreak())
+                ? points1 + ":" + points2
+                : null;
 
         return new ScoreDto(
                 match.getPlayerOne().name(),
@@ -33,7 +36,7 @@ public class MatchScoreDisplayMapper {
                 points1, points2,
                 games, sets,
                 !match.isOver() && currentSet.isTiebreak(),
-                null
+                tieBreakPoints
         );
     }
 
