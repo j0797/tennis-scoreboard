@@ -78,8 +78,6 @@ public class NewMatchController extends HttpServlet {
             UUID matchId = ongoingMatchesService.createMatch(playerOneName, playerTwoName);
             log.info("Match created with id {}", matchId);
             response.sendRedirect(request.getContextPath() + "/match-score?uuid=" + matchId);
-
-            // Логику обработки исключений можно реализовать в фильтре. Так она будет централизована для всего приложения и её части не будут повторяться в разных местах.
         } catch (ValidationException e) {
             log.warn("Validation error while creating match: {}", e.getMessage());
 

@@ -76,23 +76,18 @@ public class MatchScoreController extends HttpServlet {
         log.info("POST match-score: match={}, player={}", matchIdParam, playerNumberParam);
         UUID id = Validator.parseUuid(matchIdParam);
 
-        // Название player должно быть только у объектов типа Player, а остальным переменным стоит подбирать более подходящие названия, сответствующие их типу и смыслу.
-        int player = Validator.parsePlayerNumber(playerNumberParam);
-
-        // Здесь переменная OngoingMatch называется match, а в методе doGet называется ongoingMatch. Лучше придерживаться одного подхода в именовании.
-        TennisMatch match = ongoingMatchesService.getOngoingMatch(id);
-        if (match == null) {
+        int playerNumber = Validator.parsePlayerNumber(playerNumberParam);
+        TennisMatch tennisMatch = ongoingMatchesService.getOngoingMatch(id);
+        if (tennisMatch == null) {
             log.warn("Match not found for uuid {}", id);
-
-            // Нигде нет обработки этого исключения, значит пользователь увидит страницу с ошибкой 500 (Internal Server Error), хотя не найденный матч скорее соответствует 400 (Bad Request).
             throw new NotFoundException("Match not found");
         }
 
-        ongoingMatchesService.addPoint(id, player);
+        ongoingMatchesService.addPoint(id, playerNumber);
 
-        if (match.isOver()) {
-            log.info("Match {} finished after point by player {}", id, player);
-            ScoreDto displayDto = MatchScoreDisplayMapper.toDisplayDto(match);
+        if (tennisMatch.isOver()) {
+            log.info("Match {} finished after point by player {}", id, playerNumber);
+            ScoreDto displayDto = MatchScoreDisplayMapper.toDisplayDto(tennisMatch);
             request.setAttribute(ATTR_DISPLAY_DTO, displayDto);
             request.setAttribute(ATTR_MATCH_OVER, true);
             request.getRequestDispatcher(VIEW_MATCH_SCORE).forward(request, response);

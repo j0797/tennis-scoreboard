@@ -33,10 +33,17 @@ public class PlayerServiceImpl implements PlayerService {
             return newPlayer;
         } catch (PersistenceException e) {
             log.warn("Duplicate or concurrent insert for player: {}. Retrying find.", name);
-
-            // Снова искать игрока имеет смысл только если произошло исключение из-за нарушения уникальности. Перед поиском здесь стоит это проверить. Иначе нужно обработать исключение.
-            return playerDao.findByName(name)
-                    .orElseThrow(() -> new DatabaseException("Player not found after concurrent insert: " + name, e));
+            if (isUniqueConstraintViolation(e)) {
+                return playerDao.findByName(name)
+                        .orElseThrow(() -> new DatabaseException("Player not found after concurrent insert: " + name, e));
+            }
+            throw new DatabaseException("Failed to save player: " + name, e);
         }
+    }
+
+    private boolean isUniqueConstraintViolation(PersistenceException e) {
+        Throwable cause = e.getCause();
+        return cause != null && cause.getMessage() != null
+                && cause.getMessage().toLowerCase().contains("unique");
     }
 }
