@@ -32,6 +32,14 @@ public class Validator {
         }
     }
 
+    public static void validateNames(String playerOneName, String playerTwoName) {
+        validateName(playerOneName);
+        validateName(playerTwoName);
+        if (playerOneName.equals(playerTwoName)) {
+            throw new ValidationException("Player names must be different");
+        }
+    }
+
     public static void validateUuid(String uuid) {
         if (uuid == null || uuid.isBlank()) {
             throw new ValidationException("UUID should not be empty.");
