@@ -27,9 +27,6 @@ public class FinishedMatchesController extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(FinishedMatchesController.class);
     private static final String PARAM_FILTER = "filter_by_player_name";
     private static final String PARAM_PAGE = "page";
-    private static final String ATTR_MATCHES = "matches";
-    private static final String ATTR_TOTAL_PAGES = "totalPages";
-    private static final String ATTR_CURRENT_PAGE = "currentPage";
     private static final String VIEW_MATCHES = "/WEB-INF/jsp/matches.jsp";
     private static final int DEFAULT_PAGE_SIZE = 5;
     private FinishedMatchesPersistenceService persistenceService;
@@ -49,17 +46,8 @@ public class FinishedMatchesController extends HttpServlet {
         String pageNumberParam = request.getParameter(PARAM_PAGE);
         log.info("GET /matches with filter='{}', page='{}'", playerName, pageNumberParam);
         long page = Validator.parsePage(pageNumberParam);
-        if (pageNumberParam != null) {
-
-            // Validator лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
-            page = Validator.parsePage(pageNumberParam);
-        }
         PaginationResponseDto<MatchDto> result = persistenceService.getFinishedMatches(playerName, page, DEFAULT_PAGE_SIZE);
-
-        // Данные о странице передаются по частям (хотя для этого есть специальный PaginationResponseDto). Лучше передавать сам DTO (и добавить в него currentPage)
-        request.setAttribute(ATTR_MATCHES, result.items());
-        request.setAttribute(ATTR_TOTAL_PAGES, result.totalPages());
-        request.setAttribute(ATTR_CURRENT_PAGE, page);
+        request.setAttribute("pagination", result);
         log.debug("Found {} matches, totalPages={}", result.items().size(), result.totalPages());
         request.getRequestDispatcher(VIEW_MATCHES).forward(request, response);
     }

@@ -67,7 +67,6 @@ public class NewMatchController extends HttpServlet {
             log.info("Received request to create new match: player1='{}', player2='{}'", playerOneName, playerTwoName);
 
             // Сервлет не должен заниматься оркестрацией валидации. Лучше создавать один DTO c именами игроков и передавать в валидатор его.
-            // Валидатор тоже лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
             Validator.validateName(playerOneName);
             Validator.validateName(playerTwoName);
 

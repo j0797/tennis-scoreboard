@@ -37,14 +37,13 @@ public class FinishedMatchesPersistenceServiceImpl implements FinishedMatchesPer
                 firstPlayer.getName(), secondPlayer.getName(), winner.getName());
     }
 
-    // Логику форматирования имени и рассчёта offset и totalPages можно вынести во вспомогательные private методы. Так код станет более читаемым.
     @Override
     public PaginationResponseDto<MatchDto> getFinishedMatches(String playerName, Long currentPage, int pageSize) {
-        String formattedName = (playerName == null || playerName.isBlank()) ? null : playerName.trim();
+        String formattedName = formatPlayerName(playerName);
         if (currentPage == null || currentPage < 1) {
             currentPage = 1L;
         }
-        int offset = (int) ((currentPage - 1) * pageSize);
+        int offset = calculateOffset(currentPage, pageSize);
 
         long totalMatches;
         List<Match> matches;
@@ -56,12 +55,16 @@ public class FinishedMatchesPersistenceServiceImpl implements FinishedMatchesPer
             totalMatches = matchDao.countByPlayerName(formattedName);
             matches = matchDao.findByPlayerName(formattedName, offset, pageSize);
         }
-        Long totalPages = (long) Math.ceil((double) totalMatches / pageSize);
+        long totalPages = (long) Math.ceil((double) totalMatches / pageSize);
+        List<MatchDto> matchDtos = MatchMapper.INSTANCE.toDtoList(matches);
+        return new PaginationResponseDto<>(matchDtos, totalPages, currentPage);
+    }
 
-        // Метод, принимающий List<Match> и возвращающий List<MatchDto> можно добавить в MatchMapper и перенести эту логику в него.
-        List<MatchDto> matchDtos = matches.stream()
-                .map(MatchMapper.INSTANCE::toDto)
-                .toList();
-        return new PaginationResponseDto<>(matchDtos, totalPages);
+    private String formatPlayerName(String playerName) {
+        return (playerName == null || playerName.isBlank()) ? null : playerName.trim();
+    }
+
+    private int calculateOffset(long currentPage, int pageSize) {
+        return (int) ((currentPage - 1) * pageSize);
     }
 }

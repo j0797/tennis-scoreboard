@@ -58,8 +58,6 @@ public class MatchScoreController extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String matchIdParam = request.getParameter(PARAM_UUID);
         log.debug("GET match-score with uuid={}", matchIdParam);
-
-        // Validator лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
         UUID id = Validator.parseUuid(matchIdParam);
         TennisMatch tennisMatch = ongoingMatchesService.getOngoingMatch(id);
         if (tennisMatch == null) {
@@ -76,8 +74,6 @@ public class MatchScoreController extends HttpServlet {
         String matchIdParam = request.getParameter(PARAM_UUID);
         String playerNumberParam = request.getParameter(PARAM_PLAYER);
         log.info("POST match-score: match={}, player={}", matchIdParam, playerNumberParam);
-
-        // Validator лучше внедрять через метод init(), а не обращать к нему напрямую из этого метода
         UUID id = Validator.parseUuid(matchIdParam);
 
         // Название player должно быть только у объектов типа Player, а остальным переменным стоит подбирать более подходящие названия, сответствующие их типу и смыслу.

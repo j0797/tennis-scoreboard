@@ -50,7 +50,7 @@
                 <th>Player Two</th>
                 <th>Winner</th>
             </tr>
-            <c:forEach var="match" items="${matches}">
+            <c:forEach var="match" items="${pagination.items}">
                 <tr>
                     <td>${match.player1.name}</td>
                     <td>${match.player2.name}</td>
@@ -64,21 +64,22 @@
                     </td>
                 </tr>
             </c:forEach>
-            <c:if test="${empty matches}">
+            <c:if test="${empty pagination.items}">
                 <tr>
                     <td colspan="3">No matches found.</td>
                 </tr>
             </c:if>
         </table>
         <div class="pagination">
-            <c:if test="${currentPage > 1}">
-                <a class="prev" href="?page=${currentPage-1}&filter_by_player_name=${param.filter_by_player_name}">
+            <c:if test="${pagination.currentPage > 1}">
+                <a class="prev"
+                   href="?page=${pagination.currentPage-1}&filter_by_player_name=${param.filter_by_player_name}">
                     &lt; </a>
             </c:if>
 
-            <c:forEach begin="1" end="${totalPages}" var="pageNum">
+            <c:forEach begin="1" end="${pagination.totalPages}" var="pageNum">
                 <c:choose>
-                    <c:when test="${pageNum == currentPage}">
+                    <c:when test="${pageNum == pagination.currentPage}">
                         <a class="num-page current"
                            href="?page=${pageNum}&filter_by_player_name=${param.filter_by_player_name}">${pageNum}</a>
                     </c:when>
@@ -89,8 +90,9 @@
                 </c:choose>
             </c:forEach>
 
-            <c:if test="${currentPage < totalPages}">
-                <a class="next" href="?page=${currentPage+1}&filter_by_player_name=${param.filter_by_player_name}">
+            <c:if test="${pagination.currentPage < pagination.totalPages}">
+                <a class="next"
+                   href="?page=${pagination.currentPage+1}&filter_by_player_name=${param.filter_by_player_name}">
                     &gt; </a>
             </c:if>
         </div>
