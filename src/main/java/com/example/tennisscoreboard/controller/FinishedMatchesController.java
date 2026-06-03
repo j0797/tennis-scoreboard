@@ -1,21 +1,16 @@
 package com.example.tennisscoreboard.controller;
 
-import com.example.tennisscoreboard.dao.MatchDao;
-import com.example.tennisscoreboard.dao.PlayerDao;
+import com.example.tennisscoreboard.config.ApplicationContext;
 import com.example.tennisscoreboard.dto.MatchDto;
 import com.example.tennisscoreboard.dto.PaginationResponseDto;
 import com.example.tennisscoreboard.service.FinishedMatchesPersistenceService;
-import com.example.tennisscoreboard.service.PlayerService;
-import com.example.tennisscoreboard.service.impl.FinishedMatchesPersistenceServiceImpl;
-import com.example.tennisscoreboard.service.impl.PlayerServiceImpl;
-import com.example.tennisscoreboard.util.HibernateUtil;
 import com.example.tennisscoreboard.util.Validator;
+import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,12 +27,10 @@ public class FinishedMatchesController extends HttpServlet {
     private FinishedMatchesPersistenceService persistenceService;
 
     @Override
-    public void init() {
-        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
-        PlayerDao playerDao = new PlayerDao(sessionFactory);
-        MatchDao matchDao = new MatchDao(sessionFactory);
-        PlayerService playerService = new PlayerServiceImpl(playerDao);
-        this.persistenceService = new FinishedMatchesPersistenceServiceImpl(matchDao, playerService);
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        ApplicationContext context = (ApplicationContext) getServletContext().getAttribute("appContext");
+        this.persistenceService = context.getPersistenceService();
     }
 
     @Override
