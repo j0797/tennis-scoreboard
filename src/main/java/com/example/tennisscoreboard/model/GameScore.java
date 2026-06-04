@@ -4,12 +4,12 @@ import lombok.Getter;
 
 @Getter
 public class GameScore {
-    private Points playerOne;
-    private Points playerTwo;
+    private Points firstPlayer;
+    private Points secondPlayer;
 
     public GameScore() {
-        this.playerOne = Points.LOVE;
-        this.playerTwo = Points.LOVE;
+        this.firstPlayer = Points.LOVE;
+        this.secondPlayer = Points.LOVE;
     }
 
     public void scorePoint(int player) {
@@ -17,25 +17,27 @@ public class GameScore {
             throw new IllegalStateException("Cannot score a point in a finished game");
         }
         if (player == 1) {
-            playerOne = nextPoint(playerOne, playerTwo);
-            if (playerOne != Points.ADVANTAGE) {
-                playerTwo = resetAdvantage(playerTwo);
+            firstPlayer = nextPoint(firstPlayer, secondPlayer);
+            if (firstPlayer != Points.ADVANTAGE) {
+                secondPlayer = resetAdvantage(secondPlayer);
             }
         } else {
-            playerTwo = nextPoint(playerTwo, playerOne);
-            if (playerTwo != Points.ADVANTAGE) {
-                playerOne = resetAdvantage(playerOne);
+            secondPlayer = nextPoint(secondPlayer, firstPlayer);
+            if (secondPlayer != Points.ADVANTAGE) {
+                firstPlayer = resetAdvantage(firstPlayer);
             }
         }
     }
 
     public boolean isOver() {
-        return playerOne == Points.WON || playerTwo == Points.WON;
+        return firstPlayer == Points.WON || secondPlayer == Points.WON;
     }
 
     public int winner() {
-        if (!isOver()) throw new IllegalStateException("Game is not over yet");
-        return playerOne == Points.WON ? 1 : 2;
+        if (!isOver()) {
+            throw new IllegalStateException("Game is not over yet");
+        }
+        return firstPlayer == Points.WON ? 1 : 2;
     }
 
     private Points resetAdvantage(Points points) {

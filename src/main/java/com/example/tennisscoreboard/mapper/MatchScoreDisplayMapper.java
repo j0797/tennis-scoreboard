@@ -18,8 +18,8 @@ public class MatchScoreDisplayMapper {
             points2 = String.valueOf(tb.getPointsTwo());
         } else {
             GameScore currentGame = currentSet.getCurrentGameScore();
-            points1 = formatPoints(currentGame.getPlayerOne());
-            points2 = formatPoints(currentGame.getPlayerTwo());
+            points1 = formatPoints(currentGame.getFirstPlayer());
+            points2 = formatPoints(currentGame.getSecondPlayer());
         }
 
         String games = currentSet.getGamesOne() + ":" + currentSet.getGamesTwo();
@@ -30,8 +30,8 @@ public class MatchScoreDisplayMapper {
                 : null;
 
         return new ScoreDto(
-                match.getPlayerOne().name(),
-                match.getPlayerTwo().name(),
+                match.getFirstPlayer().name(),
+                match.getSecondPlayer().name(),
                 winnerName,
                 points1, points2,
                 games, sets,

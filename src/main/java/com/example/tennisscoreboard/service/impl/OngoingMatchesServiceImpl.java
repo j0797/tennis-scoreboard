@@ -1,5 +1,6 @@
 package com.example.tennisscoreboard.service.impl;
 
+import com.example.tennisscoreboard.model.Player;
 import com.example.tennisscoreboard.model.TennisMatch;
 import com.example.tennisscoreboard.service.FinishedMatchesPersistenceService;
 import com.example.tennisscoreboard.service.OngoingMatchesService;
@@ -22,11 +23,12 @@ public class OngoingMatchesServiceImpl implements OngoingMatchesService {
     }
 
     @Override
-    public UUID createMatch(String playerOneName, String playerTwoName) {
+    public UUID createMatch(String firstPlayerName, String secondPlayerName) {
         UUID matchId = UUID.randomUUID();
-        ongoingMatches.put(matchId, new TennisMatch(new com.example.tennisscoreboard.model.Player(null, playerOneName),
-                new com.example.tennisscoreboard.model.Player(null, playerTwoName)));
-        log.info("New match created: {} vs {}, id={}", playerOneName, playerTwoName, matchId);
+        ongoingMatches.put(matchId, new TennisMatch(new Player(null, firstPlayerName),
+                new Player(null, secondPlayerName)
+        ));
+        log.info("New match created: {} vs {}, id={}", firstPlayerName, secondPlayerName, matchId);
         return matchId;
     }
 

@@ -5,15 +5,15 @@ import lombok.Getter;
 @Getter
 public class TennisMatch {
     private static final int SETS_TO_WIN = 2;
-    private final Player playerOne;
-    private final Player playerTwo;
+    private final Player firstPlayer;
+    private final Player secondPlayer;
     private int setsOne;
     private int setsTwo;
     private SetScore currentSet;
 
-    public TennisMatch(Player playerOne, Player playerTwo) {
-        this.playerOne = playerOne;
-        this.playerTwo = playerTwo;
+    public TennisMatch(Player firstPlayer, Player secondPlayer) {
+        this.firstPlayer = firstPlayer;
+        this.secondPlayer = secondPlayer;
         this.currentSet = new SetScore();
     }
 
@@ -35,12 +35,15 @@ public class TennisMatch {
         if (!isOver()) {
             throw new IllegalStateException("Match is not over yet");
         }
-        return setsOne > setsTwo ? playerOne : playerTwo;
+        return setsOne > setsTwo ? firstPlayer : secondPlayer;
     }
 
     private void applySetResult() {
-        if (currentSet.winner() == 1) setsOne++;
-        else setsTwo++;
+        if (currentSet.winner() == 1) {
+            setsOne++;
+        } else {
+            setsTwo++;
+        }
         if (!isOver()) {
             currentSet = new SetScore();
         }

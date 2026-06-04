@@ -57,8 +57,11 @@ public class SetScore {
     }
 
     private void applyGameResult() {
-        if (currentGameScore.winner() == 1) gamesOne++;
-        else gamesTwo++;
+        if (currentGameScore.winner() == 1) {
+            gamesOne++;
+        } else {
+            gamesTwo++;
+        }
 
         if (shouldStartTiebreak()) {
             tiebreakGame = new TiebreakGame();

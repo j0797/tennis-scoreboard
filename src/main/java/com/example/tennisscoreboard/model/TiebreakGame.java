@@ -1,5 +1,8 @@
 package com.example.tennisscoreboard.model;
 
+import lombok.Getter;
+
+@Getter
 public class TiebreakGame {
     private static final int POINTS_TO_WIN = 7;
     private static final int MIN_DIFFERENCE = 2;
@@ -10,8 +13,11 @@ public class TiebreakGame {
         if (isOver()) {
             throw new IllegalStateException("Cannot score a point in a finished tiebreak");
         }
-        if (player == 1) pointsOne++;
-        else pointsTwo++;
+        if (player == 1) {
+            pointsOne++;
+        } else {
+            pointsTwo++;
+        }
     }
 
     public boolean isOver() {
@@ -24,14 +30,6 @@ public class TiebreakGame {
             throw new IllegalStateException("Tiebreak is not over yet");
         }
         return pointsOne > pointsTwo ? 1 : 2;
-    }
-
-    public int getPointsOne() {
-        return pointsOne;
-    }
-
-    public int getPointsTwo() {
-        return pointsTwo;
     }
 
     public static int getGamesForPlayer(int player, int winner) {

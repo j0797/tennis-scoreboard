@@ -27,8 +27,8 @@ public class FinishedMatchesPersistenceServiceImpl implements FinishedMatchesPer
 
     @Override
     public void save(TennisMatch tennisMatch) {
-        Player firstPlayer = playerService.findOrCreatePlayer(tennisMatch.getPlayerOne().name());
-        Player secondPlayer = playerService.findOrCreatePlayer(tennisMatch.getPlayerTwo().name());
+        Player firstPlayer = playerService.findOrCreatePlayer(tennisMatch.getFirstPlayer().name());
+        Player secondPlayer = playerService.findOrCreatePlayer(tennisMatch.getSecondPlayer().name());
         Player winner = playerService.findOrCreatePlayer(tennisMatch.winner().name());
 
         Match match = new Match(firstPlayer, secondPlayer, winner);

@@ -18,8 +18,8 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
-    public UUID createMatch(String playerOneName, String playerTwoName) {
-        return ongoingMatchesService.createMatch(playerOneName, playerTwoName);
+    public UUID createMatch(String firstPlayerName, String secondPlayerName) {
+        return ongoingMatchesService.createMatch(firstPlayerName, secondPlayerName);
     }
 
     @Override

@@ -28,7 +28,6 @@ public class PlayerDao extends BaseDao<Player> {
                     .uniqueResultOptional();
         } catch (HibernateException e) {
             throw new DatabaseException("Failed to find player by name: " + name, e);
-
         }
     }
 }

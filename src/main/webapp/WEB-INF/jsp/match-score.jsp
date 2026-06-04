@@ -57,7 +57,7 @@
                 </thead>
                 <tbody>
                 <tr class="player1">
-                    <td class="table-text">${displayDto.playerOneName}</td>
+                    <td class="table-text">${displayDto.firstPlayerName}</td>
                     <td class="table-text">${displayDto.sets.split(':')[0]}</td>
                     <td class="table-text">${displayDto.games.split(':')[0]}</td>
                     <td class="table-text">
@@ -66,7 +66,7 @@
                                 ${displayDto.tieBreakPoints.split(':')[0]}
                             </c:when>
                             <c:otherwise>
-                                ${displayDto.pointsPlayer1}
+                                ${displayDto.pointsFirstPlayer}
                             </c:otherwise>
                         </c:choose>
                     </td>
@@ -80,7 +80,7 @@
                     </c:if>
                 </tr>
                 <tr class="player2">
-                    <td class="table-text">${displayDto.playerTwoName}</td>
+                    <td class="table-text">${displayDto.secondPlayerName}</td>
                     <td class="table-text">${displayDto.sets.split(':')[1]}</td>
                     <td class="table-text">${displayDto.games.split(':')[1]}</td>
                     <td class="table-text">
@@ -89,7 +89,7 @@
                                 ${displayDto.tieBreakPoints.split(':')[1]}
                             </c:when>
                             <c:otherwise>
-                                ${displayDto.pointsPlayer2}
+                                ${displayDto.pointsSecondPlayer}
                             </c:otherwise>
                         </c:choose>
                     </td>
