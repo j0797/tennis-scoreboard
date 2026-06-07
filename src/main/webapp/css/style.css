@@ -207,6 +207,7 @@ footer {
 
 .btn-filter {
     width: 280px;
+    height: 45px;
     line-height: 45px;
     margin-left: 20px;
     border-radius: 18px;
@@ -214,6 +215,19 @@ footer {
     background-color: #42a7f5;
     color: #fff;
     cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    box-sizing: border-box;
+    padding: 0;
+    font-size: 16px;
+    vertical-align: middle;
+    font-family: inherit;
+}
+
+a.btn-filter {
+    width: 280px;
+    display: inline-block;
 }
 
 /* Current match */
@@ -506,4 +520,9 @@ footer {
 
 .num-page.current {
     font-weight: bold;
+}
+
+.ellipsis {
+    margin: 0 20px;
+    color: black;
 }

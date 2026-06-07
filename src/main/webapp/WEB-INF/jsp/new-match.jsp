@@ -46,7 +46,8 @@
                            placeholder="Name"
                            type="text"
                            required
-                           title="Enter a name">
+                           title="Enter a name"
+                           value="${param.playerOneName}">
 
                     <label class="label-player" for="playerTwo">Player two</label>
                     <input class="input-player"
@@ -55,7 +56,8 @@
                            placeholder="Name"
                            type="text"
                            required
-                           title="Enter a name">
+                           title="Enter a name"
+                           value="${param.playerTwoName}">
 
                     <input class="form-button" type="submit" value="Start">
                 </form>

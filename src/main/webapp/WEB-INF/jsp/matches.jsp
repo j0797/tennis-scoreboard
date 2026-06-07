@@ -31,19 +31,18 @@
 <main>
     <div class="container">
         <h1>Matches</h1>
-        <div class="input-container">
-            <form method="get" action="${pageContext.request.contextPath}/matches">
-                <label>
-                    <input class="input-filter"
-                           name="filter_by_player_name"
-                           placeholder="Filter by name"
-                           type="text"
-                           value="${param.filter_by_player_name}">
-                </label>
-                <button class="btn-filter" type="submit">Filter</button>
-                <a href="${pageContext.request.contextPath}/matches" class="btn-filter">Reset Filter</a>
-            </form>
-        </div>
+        <form method="get" action="${pageContext.request.contextPath}/matches" class="input-container">
+            <label>
+                <input class="input-filter"
+                       name="filter_by_player_name"
+                       placeholder="Filter by name"
+                       type="text"
+                       value="${param.filter_by_player_name}">
+            </label>
+            <button class="btn-filter" type="submit">Filter</button>
+            <button class="btn-filter" type="submit" onclick="this.form.filter_by_player_name.value=''">Reset Filter
+            </button>
+        </form>
         <table class="table-matches">
             <tr>
                 <th>Player One</th>
@@ -74,26 +73,47 @@
             <c:if test="${pagination.currentPage > 1}">
                 <a class="prev"
                    href="?page=${pagination.currentPage-1}&filter_by_player_name=${param.filter_by_player_name}">
-                    &lt; </a>
+                    &lt;
+                </a>
+            </c:if>
+
+            <c:if test="${pagination.currentPage > 3}">
+                <a class="num-page"
+                   href="?page=1&filter_by_player_name=${param.filter_by_player_name}">1</a>
+                <c:if test="${pagination.currentPage > 4}">
+                    <span class="ellipsis">...</span>
+                </c:if>
             </c:if>
 
             <c:forEach begin="1" end="${pagination.totalPages}" var="pageNum">
-                <c:choose>
-                    <c:when test="${pageNum == pagination.currentPage}">
-                        <a class="num-page current"
-                           href="?page=${pageNum}&filter_by_player_name=${param.filter_by_player_name}">${pageNum}</a>
-                    </c:when>
-                    <c:otherwise>
-                        <a class="num-page"
-                           href="?page=${pageNum}&filter_by_player_name=${param.filter_by_player_name}">${pageNum}</a>
-                    </c:otherwise>
-                </c:choose>
+                <c:if test="${pageNum >= pagination.currentPage - 2
+                   && pageNum <= pagination.currentPage + 2}">
+                    <c:choose>
+                        <c:when test="${pageNum == pagination.currentPage}">
+                            <a class="num-page current"
+                               href="?page=${pageNum}&filter_by_player_name=${param.filter_by_player_name}">${pageNum}</a>
+                        </c:when>
+                        <c:otherwise>
+                            <a class="num-page"
+                               href="?page=${pageNum}&filter_by_player_name=${param.filter_by_player_name}">${pageNum}</a>
+                        </c:otherwise>
+                    </c:choose>
+                </c:if>
             </c:forEach>
+
+            <c:if test="${pagination.currentPage < pagination.totalPages - 2}">
+                <c:if test="${pagination.currentPage < pagination.totalPages - 3}">
+                    <span class="ellipsis">...</span>
+                </c:if>
+                <a class="num-page"
+                   href="?page=${pagination.totalPages}&filter_by_player_name=${param.filter_by_player_name}">${pagination.totalPages}</a>
+            </c:if>
 
             <c:if test="${pagination.currentPage < pagination.totalPages}">
                 <a class="next"
                    href="?page=${pagination.currentPage+1}&filter_by_player_name=${param.filter_by_player_name}">
-                    &gt; </a>
+                    &gt;
+                </a>
             </c:if>
         </div>
     </div>
